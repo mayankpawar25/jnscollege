@@ -13,7 +13,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                         <h3 class="box-title"><i class="fa fa-search"></i>
                             <!-- <?php // echo $this->lang->line('select_criteria'); 
                                     ?> -->
-                            Import Students
+                            Import Students NEP
                         </h3>
                         <!-- <div class="pull-right box-tools">
                             <a href="<?php echo site_url('student/exportformat') ?>">
@@ -124,7 +124,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                     </div>
                     <hr /> -->
 
-                    <form action="<?php echo site_url('student/import') ?>" id="employeeform" name="employeeform" method="post" enctype="multipart/form-data">
+                    <form action="<?php echo site_url('student/importnep') ?>" id="employeeform" name="employeeform" method="post" enctype="multipart/form-data">
                         <div class="box-body">
                             <?php echo $this->customlib->getCSRF(); ?>
                             <div class="row">

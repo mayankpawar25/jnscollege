@@ -114,4 +114,26 @@ class Category_model extends MY_Model
         }
     }
 
+    /**
+     * This funtion takes id as a parameter and will fetch the record.
+     * If id is not provided, then it will fetch all the records form the table.
+     * @param string $categoryName
+     * @return mixed
+     */
+    public function getByCategoryName($categoryName = null)
+    {
+        $this->db->select()->from('categories');
+        if ($categoryName != null) {
+            $this->db->like('category', $categoryName);
+        } else {
+            $this->db->order_by('id');
+        }
+        $query = $this->db->get();
+        if ($categoryName != null) {
+            return $query->row_array();
+        } else {
+            return $query->result_array();
+        }
+    }
+
 }

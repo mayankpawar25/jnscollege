@@ -15,6 +15,9 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                             <a href="<?php echo site_url('student/import') ?>">
                                 <button class="btn btn-primary btn-sm"><i class="fa fa-upload"></i> <?php echo $this->lang->line('import_student'); ?></button>
                             </a>
+                            <a href="<?php echo site_url('student/importnep') ?>">
+                                <button class="btn btn-primary btn-sm"><i class="fa fa-upload"></i> <?php echo 'Import NEP'; ?></button>
+                            </a>
                         <?php }
 ?>
                     </div>

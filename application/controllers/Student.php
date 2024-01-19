@@ -951,6 +951,430 @@ class Student extends Admin_Controller
                     if (!empty($result)) {
                         $rowcount = 0;
                         for ($i = 1; $i <= count($result); $i++) {
+                            $row = (array_values($result[$i]));
+                            
+                            if(strpos($row[0], "E+") > -1) {
+                                $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center">Please remove exponential value from Appno.</div>');
+                                redirect('student/import');
+                            }
+
+                            $student_data[$i] = array();
+
+                            $categoryId = null;
+                            foreach ($data['categorylist'] as $category) {
+                                if (strcasecmp($category['category'], $row[17]) === 0) {
+                                    $categoryId = $category['id'];
+                                    break;
+                                }
+                            }
+
+                            // Get customfield data belongs to student from table
+                            $customFieldData = $this->customfield_model->getByBelong('students');
+                            
+                            $student_data[$i]['admission_no'] = $row[0];
+                            $student_data[$i]['roll_no'] = NULL;
+                            $student_data[$i]['firstname'] = $row[2];
+                            $student_data[$i]['gender'] = NULL;
+                            if(!empty($row[18])) {
+                                $student_data[$i]['gender'] = $row[18] == 'F' ? 'Female' : 'Male';
+                            }
+                            $student_data[$i]['dob'] = date('Y-m-d', strtotime($row[7]));
+                            $student_data[$i]['mobileno'] = $row[10];
+                            $student_data[$i]['email'] = NULL;
+                            if(!empty($row[11]) && strpos($row[11], 'XXXXX') <= -1) {
+                                $student_data[$i]['email'] = $row[11];
+                            }
+                            $student_data[$i]['admission_date'] = $row[16];
+                            $student_data[$i]['blood_group'] = '';
+                            $student_data[$i]['school_house_id'] = NULL;
+                            $student_data[$i]['height'] = '';
+                            $student_data[$i]['weight'] = '';
+                            $student_data[$i]['measurement_date'] = NULL;
+                            $student_data[$i]['father_name'] = $row[3];
+                            $student_data[$i]['father_phone'] = NULL;
+                            $student_data[$i]['father_occupation'] = '';
+                            $student_data[$i]['mother_name'] = $row[4];
+                            $student_data[$i]['mother_phone'] = NULL;
+                            $student_data[$i]['mother_occupation'] = '';
+                            $student_data[$i]['guardian_is'] = '';
+                            $student_data[$i]['guardian_name'] = NULL;
+                            $student_data[$i]['guardian_relation'] = NULL;
+                            $student_data[$i]['guardian_email'] = NULL;
+                            $student_data[$i]['guardian_phone'] = NULL;
+                            $student_data[$i]['guardian_occupation'] = '';
+                            $student_data[$i]['guardian_address'] = NULL;
+                            $student_data[$i]['current_address'] = $row[19];
+                            $student_data[$i]['permanent_address'] = $row[19];
+                            $student_data[$i]['bank_account_no'] = '';
+                            $student_data[$i]['bank_name'] = '';
+                            $student_data[$i]['ifsc_code'] = '';
+                            $student_data[$i]['adhar_no'] = '';
+                            $student_data[$i]['samagra_id'] = '';
+                            $student_data[$i]['rte'] = '';
+                            $student_data[$i]['previous_school'] = '';
+                            $student_data[$i]['note'] = '';
+                            $student_data[$i]['category_id'] = $categoryId;
+
+                            // foreach ($result[$i] as $key => $value) {
+
+                            //     $student_data[$i][$fields[$n]] = $this->encoding_lib->toUTF8($result[$i][$key]);
+
+                            //     $student_data[$i]['is_active'] = 'yes';
+
+                            //     if (date('Y-m-d', strtotime($result[$i]['date_of_birth'])) === $result[$i]['date_of_birth']) {
+                            //         $student_data[$i]['dob'] = date('Y-m-d', strtotime($result[$i]['date_of_birth']));
+                            //     } else {
+                            //         $student_data[$i]['dob'] = null;
+                            //     }
+
+                            //     if (date('Y-m-d', strtotime($result[$i]['measurement_date'])) === $result[$i]['measurement_date']) {
+                            //         $student_data[$i]['measurement_date'] = date('Y-m-d', strtotime($result[$i]['measurement_date']));
+                            //     } else {
+                            //         $student_data[$i]['measurement_date'] = '';
+                            //     }
+
+                            //     if (date('Y-m-d', strtotime($result[$i]['admission_date'])) === $result[$i]['admission_date']) {
+                            //         $student_data[$i]['admission_date'] = date('Y-m-d', strtotime($result[$i]['admission_date']));
+                            //     } else {
+                            //         $student_data[$i]['admission_date'] = null;
+                            //     }
+                            //     $n++;
+                            // }
+
+                            $roll_no                           = null;
+                            $adm_no                            = $row[0];
+                            $admission_no                      = $row[0];
+                            $mobile_no                         = $row[10];
+                            $email                             = $row[11];
+                            $guardian_phone                    = NULL;
+                            $guardian_email                    = NULL;
+                            $data_setting                      = array();
+                            $data_setting['id']                = $this->sch_setting_detail->id;
+                            $data_setting['adm_auto_insert']   = $this->sch_setting_detail->adm_auto_insert;
+                            $data_setting['adm_update_status'] = $this->sch_setting_detail->adm_update_status;
+                            //-------------------------
+
+                            if ($this->sch_setting_detail->adm_auto_insert) {
+                                if ($this->sch_setting_detail->adm_update_status) {
+                                    $last_student                     = $this->student_model->lastRecord();
+                                    $last_admission_digit             = str_replace($this->sch_setting_detail->adm_prefix, "", $last_student->admission_no);
+                                    $admission_no                     = $this->sch_setting_detail->adm_prefix . sprintf("%0" . $this->sch_setting_detail->adm_no_digit . "d", $last_admission_digit + 1);
+                                    $student_data[$i]["admission_no"] = $admission_no;
+                                } else {
+                                    $admission_no                     = $this->sch_setting_detail->adm_prefix . $this->sch_setting_detail->adm_start_from;
+                                    $student_data[$i]["admission_no"] = $admission_no;
+                                }
+
+                                $admission_no_exists = $this->student_model->check_adm_exists($admission_no);
+                                if ($admission_no_exists) {
+                                    $insert = "";
+                                } else {
+                                    $insert_id = $this->student_model->add($student_data[$i], $data_setting);
+                                }
+                            } else {
+
+                                if ($this->form_validation->is_unique($adm_no, 'students.admission_no')) {
+                                    $insert_id = $this->student_model->add($student_data[$i], $data_setting);
+                                } else {
+                                    $insert_id = "";
+                                }
+                            }
+
+                            //-------------------------
+                            if (!empty($insert_id)) {
+                                $data_new = array(
+                                    'student_id' => $insert_id,
+                                    'class_id'   => $class_id,
+                                    'section_id' => $section_id,
+                                    'session_id' => $session,
+                                );
+
+                                $this->student_model->add_student_session($data_new);
+                                $user_password = $this->role->get_random_password($chars_min = 6, $chars_max = 6, $use_upper_case = false, $include_numbers = true, $include_special_chars = false);
+                                $sibling_id    = $this->input->post('sibling_id');
+
+                                $data_student_login = array(
+                                    'username' => $this->student_login_prefix . $insert_id,
+                                    'password' => $user_password,
+                                    'user_id'  => $insert_id,
+                                    'role'     => 'student',
+                                );
+
+                                $this->user_model->add($data_student_login);
+                                $parent_password = $this->role->get_random_password($chars_min = 6, $chars_max = 6, $use_upper_case = false, $include_numbers = true, $include_special_chars = false);
+
+                                $temp              = $insert_id;
+                                $data_parent_login = array(
+                                    'username' => $this->parent_login_prefix . $insert_id,
+                                    'password' => $parent_password,
+                                    'user_id'  => $insert_id,
+                                    'role'     => 'parent',
+                                    'childs'   => $temp,
+                                );
+
+                                $ins_id         = $this->user_model->add($data_parent_login);
+                                $update_student = array(
+                                    'id'        => $insert_id,
+                                    'parent_id' => $ins_id,
+                                );
+
+                                $this->student_model->add($update_student);
+                                $sender_details = array('student_id' => $insert_id, 'contact_no' => $guardian_phone, 'email' => $guardian_email);
+                                $this->mailsmsconf->mailsms('student_admission', $sender_details);
+
+                                $student_login_detail = array('id' => $insert_id, 'credential_for' => 'student', 'username' => $this->student_login_prefix . $insert_id, 'password' => $user_password, 'contact_no' => $mobile_no, 'email' => $email, 'admission_no' => $admission_no);
+                                $this->mailsmsconf->mailsms('student_login_credential', $student_login_detail);
+
+                                $parent_login_detail = array('id' => $insert_id, 'credential_for' => 'parent', 'username' => $this->parent_login_prefix . $insert_id, 'password' => $parent_password, 'contact_no' => $guardian_phone, 'email' => $guardian_email, 'admission_no' => $admission_no);
+
+                                $this->mailsmsconf->mailsms('student_login_credential', $parent_login_detail);
+
+                                // Insert additional fields at custom_field_values table 
+                                $cData = [];
+                                foreach ($customFieldData as $ky => $customField) {
+                                    $cData[$ky]['belong_table_id '] = $insert_id;
+                                    $cData[$ky]['custom_field_id'] = $customField['id'];
+                                    if($customField['name'] === 'Round') {
+                                        $cData[$ky]['field_value'] = $row[6];
+                                    }
+                                    if($customField['name'] === 'Admission Status') {
+                                        $cData[$ky]['field_value'] = $row[15];
+                                    }
+                                    if($customField['name'] === 'Course Level') {
+                                        $cData[$ky]['field_value'] = $row[29];
+                                    }
+                                    if($customField['name'] === 'Allotted Course') {
+                                        $cData[$ky]['field_value'] = $row[8];
+                                    }
+                                    if($customField['name'] === 'Effective Percentage') {
+                                        $cData[$ky]['field_value'] = $row[9];
+                                    }
+                                    if($customField['name'] === 'Yojna') {
+                                        $cData[$ky]['field_value'] = $row[20];
+                                    }
+                                    if($customField['name'] === 'Enrollment No.') {
+                                        $cData[$ky]['field_value'] = '';
+                                    }
+                                    if($customField['name'] === 'Domicile') {
+                                        $cData[$ky]['field_value'] = $row[28];
+                                    }
+                                    if($customField['name'] === 'Is Handicap') {
+                                        $cData[$ky]['field_value'] = $row[30] == 'N' ? 'No' : 'Yes';
+                                    }
+                                    if($customField['name'] === 'Is Minority') {
+                                        $cData[$ky]['field_value'] = $row[31];
+                                    }
+                                    if($customField['name'] === 'Fee') {
+                                        $cData[$ky]['field_value'] = $row[32];
+                                    }
+                                    if($customField['name'] === 'Transaction ID') {
+                                        $cData[$ky]['field_value'] = $row[33];
+                                    }
+                                    if($customField['name'] === 'Transaction Date') {
+                                        $cData[$ky]['field_value'] = date('Y-m-d H:i:s', strtotime($row[34]));
+                                    }
+                                }
+                                $this->customfield_model->updateRecord($cData, $insert_id, 'students');
+
+                                $data['csvData'] = $result;
+                                $this->session->set_flashdata('msg', '<div class="alert alert-success text-center">' . $this->lang->line('students_imported_successfully') . '</div>');
+
+                                $rowcount++;
+                                $this->session->set_flashdata('msg', '<div class="alert alert-success text-center">' . $this->lang->line('total') . ' ' . count($result) . $this->lang->line('records_found_in_csv_file_total') . $rowcount . ' ' . $this->lang->line('records_imported_successfully') . '</div>');
+                            } else {
+
+                                $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center">' . $this->lang->line('record_already_exist') . '</div>');
+                            }
+                        }
+                    } else {
+
+                        $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center">' . $this->lang->line('no_record_found') . '</div>');
+                    }
+                } else {
+
+                    $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center">' . $this->lang->line('please_upload_csv_file_only') . '</div>');
+                }
+            }
+
+            redirect('student/import');
+        }
+    }
+    
+    public function importnep()
+    {
+        if (!$this->rbac->hasPrivilege('import_student', 'can_view')) {
+            access_denied();
+        }
+
+        $data['title']      = $this->lang->line('import_student');
+        $data['title_list'] = $this->lang->line('recently_added_student');
+        $session            = $this->setting_model->getCurrentSession();
+        $class              = $this->class_model->get('', $classteacher = 'yes');
+        $data['classlist']  = $class;
+        $userdata           = $this->customlib->getUserData();
+
+        $this->form_validation->set_rules('class_id', $this->lang->line('class'), 'trim|required|xss_clean');
+        $this->form_validation->set_rules('section_id', $this->lang->line('section'), 'trim|required|xss_clean');
+        $this->form_validation->set_rules('file', $this->lang->line('image'), 'callback_handle_csv_upload');
+        
+        if ($this->form_validation->run() == false) {
+            $this->load->view('layout/header', $data);
+            $this->load->view('student/importnep', $data);
+            $this->load->view('layout/footer', $data);
+        } else {
+
+            $student_categorize = 'class';
+            if ($student_categorize == 'class') {
+                $section = 0;
+            } else if ($student_categorize == 'section') {
+
+                $section = $this->input->post('section_id');
+            }
+            $class_id   = $this->input->post('class_id');
+            $section_id = $this->input->post('section_id');
+
+            $session = $this->setting_model->getCurrentSession();
+            
+            if (isset($_FILES["file"]) && !empty($_FILES['file']['name'])) {
+                $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+                if ($ext == 'csv') {
+                    $file = $_FILES['file']['tmp_name'];
+                    $this->load->library('CSVReader');
+                    $result = $this->csvreader->parse_file($file);
+
+                    if (!empty($result)) {
+                        $rowcount = 0;
+                        $successcount = 0;
+                        $failedcount = 0;
+                        for ($i = 1; $i <= count($result); $i++) {
+                            $row = (array_values($result[$i]));
+                            
+                            if(strpos($row[0], "E+") > -1) {
+                                $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center">Please remove exponential value from Appno.</div>');
+                                redirect('student/import');
+                            }
+
+                            // Get student id based on Application no.
+                            $student_det = $this->student_model->findByAdmission($row[0]);
+                            if(!isset($student_det) || empty($student_det)) {
+                                $failedcount++;
+                            } else {
+                                $successcount++;
+                                $insert_id = $student_det->id;
+                            }
+
+                            $student_data[$i] = array();
+
+                            // Get customfield data belongs to student from table
+                            $customFieldData = $this->customfield_model->getByBelong('students');
+                            
+                            //-------------------------
+                            if (!empty($insert_id)) {
+                                
+                                // Insert additional fields at custom_field_values table 
+                                $cData = [];
+                               
+                                $krow = 0;
+                                foreach ($customFieldData as $ky => $customField) {
+                                    $cData[$krow]['belong_table_id '] = $insert_id;
+                                    $cData[$krow]['custom_field_id'] = $customField['id'];
+                                    if($customField['name'] === 'Major Subject') {
+                                        $cData[$krow]['field_value'] = $row[9];
+                                        $krow++;
+                                    }
+                                    if($customField['name'] === 'Minor Subject') {
+                                        $cData[$krow]['field_value'] = $row[10];
+                                        $krow++;
+                                    }
+                                    if($customField['name'] === 'Open Elective Subject') {
+                                        $cData[$krow]['field_value'] = $row[11];
+                                        $krow++;
+                                    }
+                                    if($customField['name'] === 'Vocational Subject') {
+                                        $cData[$krow]['field_value'] = $row[12];
+                                        $krow++;
+                                    }
+                                    if($customField['name'] === 'Project/Internship') {
+                                        $cData[$krow]['field_value'] = $row[13];
+                                        $krow++;
+                                    }
+                                }
+                                
+                                $this->customfield_model->updateRecord($cData, $insert_id, 'students');
+
+                                $data['csvData'] = $result;
+                                $this->session->set_flashdata('msg', '<div class="alert alert-success text-center">' . $this->lang->line('students_imported_successfully') . '</div>');
+
+                                $rowcount++;
+                                
+                                $this->session->set_flashdata('msg', '<div class="alert alert-success text-center">' . $successcount . ' student details have been successfully imported, with' . $failedcount . ' records failing out of the total ' . $rowcount . '.</div>');
+                            } else {
+
+                                $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center">' . $this->lang->line('record_already_exist') . '</div>');
+                            }
+                        }
+                    } else {
+
+                        $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center">' . $this->lang->line('no_record_found') . '</div>');
+                    }
+                } else {
+
+                    $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center">' . $this->lang->line('please_upload_csv_file_only') . '</div>');
+                }
+            }
+
+            redirect('student/importnep');
+        }
+    }
+
+    public function import1()
+    {
+        if (!$this->rbac->hasPrivilege('import_student', 'can_view')) {
+            access_denied();
+        }
+        $data['title']      = $this->lang->line('import_student');
+        $data['title_list'] = $this->lang->line('recently_added_student');
+        $session            = $this->setting_model->getCurrentSession();
+        $class              = $this->class_model->get('', $classteacher = 'yes');
+        $data['classlist']  = $class;
+        $userdata           = $this->customlib->getUserData();
+
+        $category = $this->category_model->get();
+
+        $fields = array('admission_no', 'roll_no', 'firstname', 'middlename', 'lastname', 'gender', 'dob', 'category_id', 'religion', 'cast', 'mobileno', 'email', 'admission_date', 'blood_group', 'school_house_id', 'height', 'weight', 'measurement_date', 'father_name', 'father_phone', 'father_occupation', 'mother_name', 'mother_phone', 'mother_occupation', 'guardian_is', 'guardian_name', 'guardian_relation', 'guardian_email', 'guardian_phone', 'guardian_occupation', 'guardian_address', 'current_address', 'permanent_address', 'bank_account_no', 'bank_name', 'ifsc_code', 'adhar_no', 'samagra_id', 'rte', 'previous_school', 'note');
+
+        $data["fields"]       = $fields;
+        $data['categorylist'] = $category;
+        $this->form_validation->set_rules('class_id', $this->lang->line('class'), 'trim|required|xss_clean');
+        $this->form_validation->set_rules('section_id', $this->lang->line('section'), 'trim|required|xss_clean');
+        $this->form_validation->set_rules('file', $this->lang->line('image'), 'callback_handle_csv_upload');
+        if ($this->form_validation->run() == false) {
+            $this->load->view('layout/header', $data);
+            $this->load->view('student/import', $data);
+            $this->load->view('layout/footer', $data);
+        } else {
+
+            $student_categorize = 'class';
+            if ($student_categorize == 'class') {
+                $section = 0;
+            } else if ($student_categorize == 'section') {
+
+                $section = $this->input->post('section_id');
+            }
+            $class_id   = $this->input->post('class_id');
+            $section_id = $this->input->post('section_id');
+
+            $session = $this->setting_model->getCurrentSession();
+            if (isset($_FILES["file"]) && !empty($_FILES['file']['name'])) {
+                $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+                if ($ext == 'csv') {
+                    $file = $_FILES['file']['tmp_name'];
+                    $this->load->library('CSVReader');
+                    $result = $this->csvreader->parse_file($file);
+
+                    if (!empty($result)) {
+                        $rowcount = 0;
+                        for ($i = 1; $i <= count($result); $i++) {
 
                             $student_data[$i] = array();
                             $n                = 0;
