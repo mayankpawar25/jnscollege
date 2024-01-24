@@ -2694,7 +2694,16 @@ function delete_comment(id,student_incident_id){
                                     <input type="hidden" name="student_id" value="<?php echo $student_doc_id; ?>" id="student_id">
                                     <div class="form-group">
                                         <label for="exampleInputEmail1"><?php echo $this->lang->line('title'); ?><small class="req" > *</small></label>
-                                        <input id="first_title" name="first_title" placeholder="" type="text" class="form-control"  value="<?php echo set_value('first_title'); ?>" />
+                                        <!-- <input id="first_title" name="first_title" placeholder="" type="text" class="form-control"  value="<?php echo set_value('first_title'); ?>" /> -->
+                                        <select class="form-control" name="first_title" required>
+                                            <option value="">Select Document Type</option>
+                                            <option value="Upload 10th Class Marksheet">Upload 10th Class Marksheet</option>
+                                            <option value="Upload 12th Class Marksheet">Upload 12th Class Marksheet</option>
+                                            <option value="Upload Caste Certificate">Upload Caste Certificate</option>
+                                            <option value="Upload Domicile certificate">Upload Domicile certificate</option>
+                                            <option value="Upload Income certificate">Upload Income certificate</option>
+                                            <option value="Upload Student Aadhar card">Upload Student Aadhar card</option>
+                                        </select>
                                         <span class="text-danger"><?php echo form_error('first_title'); ?></span>
                                     </div>
                                     <div class="form-group">

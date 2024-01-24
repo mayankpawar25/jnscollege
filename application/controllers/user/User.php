@@ -17,12 +17,11 @@ class User extends Student_Controller
         $this->load->library('media_storage');
         $this->payment_method     = $this->paymentsetting_model->getActiveMethod();
         $this->sch_setting_detail = $this->setting_model->getSetting();
-        $this->load->model(array("student_edit_field_model", 'marksdivision_model', 'offlinePayment_model','module_model'));
+        $this->load->model(array("student_edit_field_model", 'marksdivision_model', 'offlinePayment_model', 'module_model'));
 
         $this->config->load('mailsms');
         $this->load->helper('custom_helper');
         $this->result = $this->customlib->getLoggedInUserData();
-
     }
 
     public function unauthorized()
@@ -62,7 +61,6 @@ class User extends Student_Controller
                 $default_login_student_id = $data['student_lists'][0]->student_id;
                 $student_current_class    = array('session_id' => $data['student_lists'][0]->session_id, 'class_id' => $data['student_lists'][0]->class_id, 'section_id' => $data['student_lists'][0]->section_id, 'student_session_id' => $data['student_lists'][0]->student_session_id);
             }
-
         } elseif ($role == "parent") {
             $parent_id             = $this->customlib->getUsersID();
             $data['student_lists'] = $this->student_model->getParentChilds($parent_id);
@@ -99,7 +97,6 @@ class User extends Student_Controller
         }
 
         $this->load->view('user/choose', $data);
-
     }
 
     public function fees()
@@ -157,7 +154,6 @@ class User extends Student_Controller
 
                                 unset($student_due_fee[$result_key]);
                             }
-
                         }
                     } else {
                         unset($student_due_fee[$result_key]);
@@ -169,15 +165,14 @@ class User extends Student_Controller
 
             $data['student'] = $student;
 
-                $transport_fees=[];
+            $transport_fees = [];
 
-               $module=$this->module_model->getPermissionByModulename('transport');
-                if($module['is_active']){
+            $module = $this->module_model->getPermissionByModulename('transport');
+            if ($module['is_active']) {
 
-                  $transport_fees  = $this->studentfeemaster_model->getDueTransportFeeByStudent($student['student_session_id'], $student['route_pickup_point_id'], $date);
-                   
-                }
-      
+                $transport_fees  = $this->studentfeemaster_model->getDueTransportFeeByStudent($student['student_session_id'], $student['route_pickup_point_id'], $date);
+            }
+
 
             if (!empty($transport_fees)) {
                 foreach ($transport_fees as $trans_fee_key => $trans_fee_value) {
@@ -200,7 +195,6 @@ class User extends Student_Controller
 
                             unset($transport_fees[$trans_fee_key]);
                         }
-
                     }
                 }
             }
@@ -222,14 +216,14 @@ class User extends Student_Controller
         $student_current_class = $this->customlib->getStudentCurrentClsSection();
         $marks_division        = $this->marksdivision_model->get();
         $student               = $this->student_model->getStudentByClassSectionID($student_current_class->class_id, $student_current_class->section_id, $student_id);
-        
-        $superadmin_visible =    $this->Setting_model->get();      
+
+        $superadmin_visible =    $this->Setting_model->get();
 
         $data                   = array();
         $data['superadmin_restriction'] =   $superadmin_visible[0]['superadmin_restriction'];
         $data['marks_division'] = $marks_division;
         if (!empty($student)) {
-            $transport_fees=[];
+            $transport_fees = [];
 
             $student_session_id           = $student_current_class->student_session_id;
             $gradeList                    = $this->grade_model->get();
@@ -315,45 +309,42 @@ class User extends Student_Controller
             $data["resultlist"]         = $res;
             $data["start_year"]         = $start_year;
             $data["Next_year"]          = $Next_year;
-            $transport_fees=[];
-            $module=$this->module_model->getPermissionByModulename('transport');
-                if($module['is_active']){
+            $transport_fees = [];
+            $module = $this->module_model->getPermissionByModulename('transport');
+            if ($module['is_active']) {
 
-                       $transport_fees         = $this->studentfeemaster_model->getStudentTransportFees($student_session_id, $student['route_pickup_point_id']);
-                   
-                }
+                $transport_fees         = $this->studentfeemaster_model->getStudentTransportFees($student_session_id, $student['route_pickup_point_id']);
+            }
 
-                 $data['transport_fees'] = $transport_fees;
+            $data['transport_fees'] = $transport_fees;
 
-        //------- Behaviour Report Start--------
-            if($this->module_lib->hasModule('behaviour_records') && $this->studentmodule_lib->hasActive('behaviour_records') ){ 
-           
+            //------- Behaviour Report Start--------
+            if ($this->module_lib->hasModule('behaviour_records') && $this->studentmodule_lib->hasActive('behaviour_records')) {
+
                 $this->load->model("studentincidents_model");
                 // This is used to get total points of student by student id 
                 $total_points = $this->studentincidents_model->totalpoints($student_id);
                 $student['total_points'] = $total_points['totalpoints'];
-        
             }
-        //------- Behaviour Report End----------
+            //------- Behaviour Report End----------
 
             $data['student']              = $student;
+        } else {
+            redirect('site/logout');
+        }
 
-        }else{
-             redirect('site/logout');
-        }        
-        
         //------- Behaviour Report Start--------
         if ($this->module_lib->hasModule('behaviour_records')) {
-            
+
             $this->load->model("studentincidents_model");
-            
+
             // This is used to get assign incident record of student by student id
             $data['assignstudent'] = $this->studentincidents_model->studentbehaviour($student_id);
-            
+
             $this->load->model('studentbehaviour_model');
             $data['behavioursetting'] = $this->studentbehaviour_model->getsettings();
-            $data['role']    = $this->customlib->getUserRole(); 
-        }               
+            $data['role']    = $this->customlib->getUserRole();
+        }
         //------- Behaviour Report End----------       
 
         $unread_notifications = $this->notification_model->getUnreadStudentNotification();
@@ -381,30 +372,30 @@ class User extends Student_Controller
     {
         $student_current_class = $this->customlib->getStudentCurrentClsSection();
         $session_year_detail   = sessionYearDetails($this->sch_setting_detail->session, $this->sch_setting_detail->start_month);
-   
+
         $attendance_date           = ['start' => $session_year_detail['month_start'], 'end' => $session_year_detail['month_end']];
         $student_total_attendances = $this->attendencetype_model->getStudentAttendenceRange($attendance_date, $student_current_class->student_session_id);
 
         $attendence_percentage = -1;
-      
+
         if (!empty($student_total_attendances)) {
-            $total_attendance_count=count($student_total_attendances);
+            $total_attendance_count = count($student_total_attendances);
             $absents = 0;
             foreach ($student_total_attendances as $attend_key => $attend_value) {
                 ($attend_value->attendence_type_id == 4) ? $absents++ : "";
             }
-            $total_presents= $total_attendance_count-$absents;
-            $attendence_percentage= two_digit_float(($total_presents*100)/$total_attendance_count);        
+            $total_presents = $total_attendance_count - $absents;
+            $attendence_percentage = two_digit_float(($total_presents * 100) / $total_attendance_count);
         }
-       
+
         $this->session->set_userdata('top_menu', 'dashboard');
         $data          = array();
         $student_id    = $this->customlib->getStudentSessionUserID();
         $member_type   = "student";
         $checkIsMember = $this->librarymember_model->checkIsMember($member_type, $student_id);
-        
+
         $data['bookList'] = $checkIsMember;
-             
+
 
         $class_id     = $student_current_class->class_id;
         $section_id   = $student_current_class->section_id;
@@ -494,23 +485,23 @@ class User extends Student_Controller
         // end
 
         $data['visitor_list'] = $this->visitors_model->visitorbystudentid($student_current_class->student_session_id);
-        
+
         $data['studentsession_username'] = $this->customlib->getStudentSessionUserName();
         $data['student_data'] = $this->customlib->getLoggedInUserData();
-        
+
         $setting_data                 = $this->setting_model->get();
         $data['low_attendance_limit']     = $setting_data[0]['low_attendance_limit'];
-        
-        
+
+
         $data['teachers']   = $teachers   = array();
-        $student_teacher = $this->subjecttimetable_model->getTeacherByClassandSection($student_current_class->class_id, $student_current_class->section_id); 
-        
+        $student_teacher = $this->subjecttimetable_model->getTeacherByClassandSection($student_current_class->class_id, $student_current_class->section_id);
+
         foreach ($student_teacher as $value) {
             $teachers[$value->staff_id][] = $value;
         }
-        
-        $data['teacherlist']         = $teachers;        
-        
+
+        $data['teacherlist']         = $teachers;
+
         $this->load->view('layout/student/header', $data);
         $this->load->view('user/dashboard', $data);
         $this->load->view('layout/student/footer', $data);
@@ -575,7 +566,6 @@ class User extends Student_Controller
         $this->form_validation->set_rules('new_username', $this->lang->line('current_password'), 'trim|required|xss_clean|matches[confirm_username]');
         $this->form_validation->set_rules('confirm_username', $this->lang->line('confirm_username'), 'trim|required|xss_clean');
         if ($this->form_validation->run() == false) {
-
         } else {
 
             $data_array = array(
@@ -616,7 +606,6 @@ class User extends Student_Controller
     {
         $student_doc = $this->student_model->studentdocbyid($id);
         $this->media_storage->filedownload($student_doc['doc'], "./uploads/student_documents/$student_id/");
-
     }
 
     public function user_language($lang_id)
@@ -629,13 +618,13 @@ class User extends Student_Controller
         }
         $language_array      = array('lang_id' => $lang_id, 'language' => $language_name['language']);
         $student['language'] = $language_array;
-        
+
         if ($language_name['is_rtl'] == 1) {
             $student['is_rtl'] = 'enabled';
         } else {
             $student['is_rtl'] = 'disabled';
         }
-        
+
         $this->session->set_userdata('student', $student);
 
         $session = $this->session->userdata('student');
@@ -646,8 +635,8 @@ class User extends Student_Controller
         }
 
         $data['lang_id'] = $lang_id;
-        $language_result = $this->language_model->set_studentlang($id, $data);        
-    } 
+        $language_result = $this->language_model->set_studentlang($id, $data);
+    }
 
     public function change_currency()
     {
@@ -661,7 +650,6 @@ class User extends Student_Controller
             $this->load->model('guest_model');
             $update_data = array('id' => $user_id, 'currency_id' => $currency_id);
             $this->guest_model->add($update_data);
-
         } else {
 
             $user_id     = $this->customlib->getUsersID();
@@ -674,7 +662,6 @@ class User extends Student_Controller
         $this->session->userdata['student']['currency']            = $currency_id;
         $this->session->userdata['student']['currency_name']       = $currency->short_name;
         echo json_encode(['status' => 1, 'message' => $this->lang->line('currency_changed_successfully')]);
-
     }
 
     // public function change_currency()
@@ -768,12 +755,12 @@ class User extends Student_Controller
         $data['student_discount_fee'] = $student_discount_fee;
         $data['student_due_fee']      = $student_due_fee;
         $data['student']              = $student;
-        $transport_fees=[];
-        $module=$this->module_model->getPermissionByModulename('transport');
-        if($module['is_active']){
+        $transport_fees = [];
+        $module = $this->module_model->getPermissionByModulename('transport');
+        if ($module['is_active']) {
 
             $transport_fees               = $this->studentfeemaster_model->getStudentTransportFees($student_current_class->student_session_id, $student['route_pickup_point_id']);
-        }     
+        }
 
         $data['transport_fees'] = $transport_fees;
         $student_processing_fee = $this->studentfeemaster_model->getStudentProcessingFees($student_current_class->student_session_id);
@@ -848,7 +835,6 @@ class User extends Student_Controller
 
                 $feeList               = $this->studentfeemaster_model->getDueFeeByFeeSessionGroupFeetype($fee_session_group_id, $fee_master_id, $fee_groups_feetype_id);
                 $feeList->fee_category = $fee_category;
-
             }
 
             $fees_array[] = $feeList;
@@ -916,10 +902,8 @@ class User extends Student_Controller
 
             $msg   = $this->lang->line('success_message');
             $array = array('status' => 'success', 'error' => '', 'message' => $msg);
-
         }
         echo json_encode($array);
-
     }
 
     public function handle_upload()
@@ -1004,8 +988,8 @@ class User extends Student_Controller
         $this->form_validation->set_rules('father_pic', $this->lang->line('image'), 'callback_edit_handle_upload[father_pic]');
         $this->form_validation->set_rules('mother_pic', $this->lang->line('image'), 'callback_edit_handle_upload[mother_pic]');
         $this->form_validation->set_rules('guardian_pic', $this->lang->line('image'), 'callback_edit_handle_upload[guardian_pic]');
-        
-        $custom_fields              = $this->customfield_model->getByBelong('students');        
+
+        $custom_fields              = $this->customfield_model->getByBelong('students');
 
         foreach ($custom_fields as $custom_fields_key => $custom_fields_value) {
             if ($custom_fields_value['validation']) {
@@ -1217,7 +1201,7 @@ class User extends Student_Controller
 
                 $data['mother_occupation'] = $this->input->post('mother_occupation');
             }
-            
+
             $custom_field_post = $this->input->post("custom_fields[students]");
             if (isset($custom_field_post)) {
                 $custom_value_array = array();
@@ -1233,7 +1217,7 @@ class User extends Student_Controller
                 }
                 $this->customfield_model->updateRecord($custom_value_array, $id, 'students');
             }
-            
+
             $this->student_model->add($data);
 
             if (isset($_FILES["file"]) && !empty($_FILES['file']['name'])) {
@@ -1376,7 +1360,6 @@ class User extends Student_Controller
 
                     $record[$attendence_value->attendence_type_id] += 1;
                 }
-
             }
         }
 
@@ -1394,4 +1377,52 @@ class User extends Student_Controller
         return array($startmonth, $endmonth);
     }
 
+    public function updateStudent()
+    {
+        $data['id'] = $this->customlib->getStudentSessionUserID();
+        $field = '';
+        if ($this->input->post('roll_no')) {
+            $data['roll_no'] = $this->input->post('roll_no');
+            $field = 'Roll number';
+        } else if ($this->input->post('email_id')) {
+            $data['email'] = $this->input->post('email_id');
+            $field = 'Email id';
+        } else if ($this->input->post('mobileno')) {
+            $data['mobileno'] = $this->input->post('mobileno');
+            $field = 'Mobile number';
+        }
+        $this->student_model->add($data);
+        $msg   = $field . ' updated succesfully';
+        $array = array('status' => 'success', 'error' => '', 'message' => $msg);
+        echo json_encode($array);
+    }
+
+    public function updateStudentCustomField()
+    {
+        $field = 'Enrollment number';
+        if ($this->input->post('field_value')) {
+            $data['id'] = $this->input->post('id');
+            $data['field_value'] = $this->input->post('field_value');
+            $this->customfield_model->updateCustomValueRecord(['field_value' => $data['field_value']], $data['id']);
+            $msg   = $field . ' updated succesfully';
+            $array = array('status' => 'success', 'error' => '', 'message' => $msg);
+        } else {
+            $msg   = [$field . ' updation failed'];
+            $array = array('status' => 'fail', 'error' => $msg, 'message' => '');
+        }
+        echo json_encode($array);
+    }
+
+    public function updateStudentImage() 
+    {
+        $id = $this->customlib->getStudentSessionUserID();
+        if (isset($_FILES["file"]) && !empty($_FILES['file']['name'])) {
+            $fileInfo = pathinfo($_FILES["file"]["name"]);
+            $img_name = $id . '.' . $fileInfo['extension'];
+            move_uploaded_file($_FILES["file"]["tmp_name"], "./uploads/student_images/" . $img_name);
+            $data_img = array('id' => $id, 'image' => 'uploads/student_images/' . $img_name);
+            $this->student_model->add($data_img);
+        }
+        redirect('user/user/profile');
+    }
 }

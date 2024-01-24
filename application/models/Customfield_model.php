@@ -217,4 +217,16 @@ class customfield_model extends MY_Model
             $this->db->trans_commit();
         }
     }
+
+    public function updateCustomValueRecord($data, $id)
+    {
+        $this->db->trans_begin();
+        $this->db->where('id', $id);
+        $this->db->update('custom_field_values', $data);
+        if ($this->db->trans_status() === false) {
+            $this->db->trans_rollback();
+        } else {
+            $this->db->trans_commit();
+        }
+    }
 }

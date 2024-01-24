@@ -33,30 +33,41 @@ foreach ($unread_notifications as $notice_key => $notice_value) {
                <div class="box box-widget widget-user-2 mb0">
                <div class="widget-user-header bg-gray-light overflow-hidden">
 <div class="widget-user-image">
-<?php
- 
- if ($sch_setting->student_photo) {
-       ?>
-                     <img class="user-img-grid center-block img-rounded" src="       
-       <?php
-if (!empty($student["image"])) {
-        echo base_url() . $student["image"].img_time();
-    } else {
-
-        if ($student['gender'] == 'Female') {
-            echo base_url() . "uploads/student_images/default_female.jpg".img_time();
-        } else {
-            echo base_url() . "uploads/student_images/default_male.jpg".img_time();
-        }
-    }
-    ?>" alt="User profile picture">
-   <?php }?>
+    <?php
+        if ($sch_setting->student_photo) {
+    ?>      
+            <img class="user-img-grid center-block img-rounded cursor-pointer" id="student-profile" src="       
+            <?php
+                if (!empty($student["image"])) {
+                    echo base_url() . $student["image"].img_time();
+                } else {
+                    if ($student['gender'] == 'Female') {
+                        echo base_url() . "uploads/student_images/default_female.jpg".img_time();
+                    } else {
+                        echo base_url() . "uploads/student_images/default_male.jpg".img_time();
+                    }
+                }
+                ?>" alt="User profile picture">
+                <div style="display: none;">
+                    <form action="<?php echo site_url("user/user/updateStudentImage") ?>" id="employeeform" name="employeeform" method="post" accept-charset="utf-8" enctype="multipart/form-data">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="exampleInputFile"><?php echo $this->lang->line('student_photo'); ?></label>
+                                <input class="filestyle form-control" type='file' name='file' id="studentFile" size='20' />
+                            </div>
+                            <span class="text-danger"><?php echo form_error('file'); ?></span>
+                        </div>
+                    </form>
+                </div>
+            <?php 
+                }
+            ?>
 </div>
 
 <h3 class="widget-user-username"><?php echo $this->customlib->getFullname($student['firstname'], $student['middlename'], $student['lastname'], $sch_setting->middlename, $sch_setting->lastname); ?></h3>
 <h5 class="widget-user-desc mb5"><?php echo $this->lang->line('admission_no'); ?> <span class="text-aqua"><?php echo $student['admission_no']; ?></span></h5>
 <?php if ($sch_setting->roll_no) {?>
-<h5 class="widget-user-desc"><?php echo $this->lang->line('roll_number'); ?> <span class="text-aqua"><?php echo $student['roll_no']; ?></span></h5>
+<h5 class="widget-user-desc" ><?php echo $this->lang->line('roll_number'); ?> <span class="text-aqua" id="student_roll_no_label"><?php echo $student['roll_no']; ?></span></h5>
 <?php }?>
 </div></div>               
  
@@ -169,45 +180,57 @@ if ($sch_setting->student_profile_edit) {
                         <div class="table-responsive around10 pt0">
                            <table class="table3 table-striped table-hover">
                               <tbody>
-                                 <?php if ($sch_setting->admission_date) {
-    ?>
+                                <?php if ($sch_setting->admission_date) {
+                                ?>
                                  <tr class="bordertop">
                                     <td width="35%"><?php echo $this->lang->line('admission_date'); ?></td>
                                     <td class="col-md-5">
-                                       <?php
-if (!empty($student['admission_date']) && $student['admission_date'] != '0000-00-00') {
-        echo date($this->customlib->getSchoolDateFormat(), $this->customlib->dateyyyymmddTodateformat($student['admission_date']));
-    }
-    ?>
+                                    <?php
+                                        if (!empty($student['admission_date']) && $student['admission_date'] != '0000-00-00') {
+                                            echo date($this->customlib->getSchoolDateFormat(), $this->customlib->dateyyyymmddTodateformat($student['admission_date']));
+                                        }
+                                    ?>
+                                    </td>
+                                 </tr>
+                                 <?php }?>
+                                 <?php if ($sch_setting->roll_no) {
+                                ?>
+                                 <tr class="bordertop">
+                                    <td width="35%"><?php echo $this->lang->line('roll_number'); ?></td>
+                                    <td class="col-md-5">
+                                        <input type="text" name="roll_no" id="edit_roll_no" placeholder="Enter Roll Number" value="<?php echo $student['roll_no']?>" class="form-control profile-input"/>
                                     </td>
                                  </tr>
                                  <?php }?>
                                  <tr>
                                     <td><?php echo $this->lang->line('date_of_birth'); ?></td>
-                                    <td><?php
-if (!empty($student['dob'])) {
-    echo date($this->customlib->getSchoolDateFormat(), $this->customlib->dateyyyymmddTodateformat($student['dob']));
-}
-?></td>
+                                    <td>
+                                        <?php
+                                            if (!empty($student['dob'])) {
+                                                echo date($this->customlib->getSchoolDateFormat(), $this->customlib->dateyyyymmddTodateformat($student['dob']));
+                                            }
+                                        ?>
+                                    </td>
                                  </tr>
-                                 <?php if ($sch_setting->category) {
-    ?>
+                                 <?php if ($sch_setting->category) { ?>
                                  <tr>
                                     <td><?php echo $this->lang->line('category'); ?></td>
                                     <td>
-                                       <?php
-foreach ($category_list as $value) {
-        if ($student['category_id'] == $value['id']) {
-            echo $value['category'];
-        }
-    }
-    ?>
+                                        <?php
+                                            foreach ($category_list as $value) {
+                                                if ($student['category_id'] == $value['id']) {
+                                                    echo $value['category'];
+                                                }
+                                            }
+                                        ?>
                                     </td>
                                  </tr>
                                  <?php }if ($sch_setting->mobile_no) {?>
                                  <tr>
                                     <td><?php echo $this->lang->line('mobile_number'); ?></td>
-                                    <td><?php echo $student['mobileno']; ?></td>
+                                    <td>
+                                        <input type="number" id="edit_mobile_no" minlength="10" maxlength="15" class="form-control profile-input" name="mobile" placeholder="Enter Personal Mobile Number" value="<?=$student['mobileno'] ?>"/>
+                                    </td>
                                  </tr>
                                  <?php }if ($sch_setting->cast) {?>
                                  <tr>
@@ -222,40 +245,70 @@ foreach ($category_list as $value) {
                                  <?php }if ($sch_setting->student_email) {?>
                                  <tr>
                                     <td><?php echo $this->lang->line('email'); ?></td>
-                                    <td><?php echo $student['email']; ?></td>
+                                    <td>
+                                        <input type="email" id="edit_email_id"  class="form-control profile-input" name="email" placeholder="Enter Personal Email Id" value="<?=$student['email'] ?>"/>
+                                    </td>
                                  </tr>
                                  <?php }?>
                                  <?php
-$cutom_fields_data = get_custom_table_values($student['id'], 'students');
-if (!empty($cutom_fields_data)) {
-    foreach ($cutom_fields_data as $field_key => $field_value) {
-        ?>
-                                 <tr>
-                                    <td><?php echo $field_value->name; ?></td>
-                                    <td>
-                                       <?php
-if (is_string($field_value->field_value) && is_array(json_decode($field_value->field_value, true)) && (json_last_error() == JSON_ERROR_NONE)) {
-            $field_array = json_decode($field_value->field_value);
-            echo "<ul class='student_custom_field'>";
-            foreach ($field_array as $each_key => $each_value) {
-                echo "<li>" . $each_value . "</li>";
-            }
-            echo "</ul>";
-        } else {
-            $display_field = $field_value->field_value;
+                                    $cutom_fields_data = get_custom_table_values($student['id'], 'students');
+                                    if (!empty($cutom_fields_data)) {
+                                        foreach ($cutom_fields_data as $field_key => $field_value) {
+                                            if($field_value->name == 'Enrollment No.') {
+                                    ?>
+                                                <tr>
+                                                    <td><?php echo $field_value->name; ?></td>
+                                                    <td>
+                                                        <?php
+                                                            if (is_string($field_value->field_value) && is_array(json_decode($field_value->field_value, true)) && (json_last_error() == JSON_ERROR_NONE)) {
+                                                                $field_array = json_decode($field_value->field_value);
+                                                                echo "<ul class='student_custom_field'>";
+                                                                foreach ($field_array as $each_key => $each_value) {
+                                                                    echo "<li>" . $each_value . "</li>";
+                                                                }
+                                                                echo "</ul>";
+                                                            } else {
+                                                                $display_field = $field_value->field_value;
 
-            if ($field_value->type == "link") {
-                $display_field = "<a href=" . $field_value->field_value . " target='_blank'>" . $field_value->field_value . "</a>";
-            }
-            echo $display_field;
-        }
-        ?>
-                                    </td>
-                                 </tr>
-                                 <?php
-}
-}
-?>
+                                                                if ($field_value->type == "link") {
+                                                                    $display_field = "<a href=" . $field_value->field_value . " target='_blank'>" . $field_value->field_value . "</a>";
+                                                                }
+                                                        ?>
+                                                                <input type="text" id="edit_enrollment_no" class="form-control profile-input" name="enrollment_no" value="<?php echo $display_field ?>" data-id="<?php echo $field_value->id ?>" placeholder="Enter enrollment number"/>
+                                                        <?php
+                                                            }
+                                                        ?>
+                                                    </td>
+                                                </tr>
+                                    <?php
+                                            } else {
+                                    ?>
+                                                <tr>
+                                                    <td><?php echo $field_value->name; ?></td>
+                                                    <td>
+                                                        <?php
+                                                            if (is_string($field_value->field_value) && is_array(json_decode($field_value->field_value, true)) && (json_last_error() == JSON_ERROR_NONE)) {
+                                                                $field_array = json_decode($field_value->field_value);
+                                                                echo "<ul class='student_custom_field'>";
+                                                                foreach ($field_array as $each_key => $each_value) {
+                                                                    echo "<li>" . $each_value . "</li>";
+                                                                }
+                                                                echo "</ul>";
+                                                            } else {
+                                                                $display_field = $field_value->field_value;
+
+                                                                if ($field_value->type == "link") {
+                                                                    $display_field = "<a href=" . $field_value->field_value . " target='_blank'>" . $field_value->field_value . "</a>";
+                                                                }
+                                                                echo $display_field;
+                                                            }
+                                                        ?>
+                                                    </td>
+                                                </tr>
+                                 <?php      }
+                                        }
+                                    }
+                                ?>
                                  <tr>
                                     <td><?php echo $this->lang->line('note'); ?></td>
                                     <td><?php echo $student['note']; ?></td>
@@ -1242,11 +1295,13 @@ for ($i = 1; $i <= 31; $i++) {
                      <!-- <div class="download_label"><?php echo "Uploaded Documents" ?></div> -->
                      <div class="timeline-header no-border">
                      <?php
-                        if (!empty($student_doc)) {
+                        // if (!empty($student_doc)) {
                       ?>
-                      <button type="button"  data-student-session-id="<?php echo $student['student_session_id'] ?>" class="btn btn-xs btn-primary pull-right myTransportFeeBtn"> <i class="fa fa-upload"></i>  <?php echo $this->lang->line('upload_documents'); ?></button>
+                      <button type="button"  data-student-session-id="<?php echo $student['student_session_id'] ?>" class="btn btn-xs btn-primary pull-right myTransportFeeBtn mb10"> <i class="fa fa-upload"></i>  <?php echo $this->lang->line('upload_documents'); ?></button>
                         <!-- <button type="button"  data-student-session-id="<?php echo $student['student_session_id'] ?>" class="btn btn-xs btn-primary pull-right myTransportFeeBtn mb10"> <i class="fa fa-upload"></i>  <?php echo $this->lang->line('upload_documents'); ?></button> -->
-                     <?php } ?>
+                     <?php 
+                        // } 
+                    ?>
                         <div class="table-responsive" style="clear: both;">
                      <?php
                         if (!empty($student_doc)) {
@@ -2299,7 +2354,16 @@ if ($consolidate_exam_result_percentage) {
                   <input type="hidden" name="student_id" value="<?php echo $student_doc_id; ?>" id="student_id">
                <div class="form-group">
                   <label for="exampleInputEmail1"><?php echo $this->lang->line('title'); ?> <small class="req">*</small></label>
-                  <input id="first_title" name="first_title" placeholder="" type="text" class="form-control"  value="<?php echo set_value('first_title'); ?>" />
+                  <!-- <input id="first_title" name="first_title" placeholder="" type="text" class="form-control"  value="<?php echo set_value('first_title'); ?>" /> -->
+                  <select class="form-control" name="first_title" required>
+                    <option value="">Select Document Type</option>
+                    <option value="Upload 10th Class Marksheet">Upload 10th Class Marksheet</option>
+                    <option value="Upload 12th Class Marksheet">Upload 12th Class Marksheet</option>
+                    <option value="Upload Caste Certificate">Upload Caste Certificate</option>
+                    <option value="Upload Domicile certificate">Upload Domicile certificate</option>
+                    <option value="Upload Income certificate">Upload Income certificate</option>
+                    <option value="Upload Student Aadhar card">Upload Student Aadhar card</option>
+                  </select>
                   <span class="text-danger"><?php echo form_error('first_title'); ?></span>
                </div>
                <div class="form-group">
@@ -2778,6 +2842,85 @@ function delete_comment(id,student_incident_id){
                }
            });
        });
+
+        // On edit rollno
+        $(document).on('change', '#edit_roll_no, #edit_email_id, #edit_mobile_no', function() {
+            const $event = $(this);
+            const roll_no = $('#edit_roll_no').val();
+            const email_id = $('#edit_email_id').val();
+            const mobileno = $('#edit_mobile_no').val();
+            let data = {};
+            
+            if ($(this).attr('id') === 'edit_roll_no') {
+                data = { roll_no: roll_no };
+            } else if ($(this).attr('id') === 'edit_email_id') {
+                data = { email_id: email_id };
+            } else if ($(this).attr('id') === 'edit_mobile_no') {
+                data = { mobileno: mobileno };
+            }
+
+            const $this = $(this).find("button[type=submit]:focus");
+            
+            $.ajax({
+                url: "<?php echo site_url("user/user/updateStudent") ?>",
+                type: "POST",
+                data: data,
+                dataType: 'json',
+                beforeSend: function () {
+                    $this.button('loading');
+                },
+                success: function (data) {
+                    successMsg(data.message);
+                    if ($event.attr('id') === 'edit_roll_no') {
+                        $('#student_roll_no_label').text(roll_no)
+                    }
+                },
+                error: function (e) {
+                    alert("<?php echo $this->lang->line('fail'); ?>");
+                    console.log(e);
+                },
+                complete: function () {
+                    $this.button('reset');
+                }
+            });
+        });
+
+        // On edit enrollment number
+        $(document).on('change', '#edit_enrollment_no', function() {
+            const $this = $(this).find("button[type=submit]:focus");
+            const enrollment = $(this).val();
+            const id = $(this).data('id');
+            $.ajax({
+                url: "<?php echo site_url("user/user/updateStudentCustomField") ?>",
+                type: "POST",
+                data: {field_value: enrollment, id: id},
+                dataType: 'json',
+                beforeSend: function () {
+                    $this.button('loading');
+                },
+                success: function (data) {
+                    successMsg(data.message);
+                },
+                error: function (e) {
+                    alert("<?php echo $this->lang->line('fail'); ?>");
+                    console.log(e);
+                },
+                complete: function () {
+                    $this.button('reset');
+                }
+            });
+        });
+
+        // Update Student image
+        $(document).on('click', '#student-profile', function() {
+            console.log('click');
+            $('input#studentFile').click();
+        })
+
+        $(document).on('change', '#studentFile', function() {
+            $('form#employeeform').submit();
+        })
+
    });
 
    $("#myTimelineButton").click(function () {
@@ -2803,7 +2946,6 @@ function delete_comment(id,student_incident_id){
           processData: false,
           beforeSend: function () {
             $this.button('loading');
-
          },
          success: function (data) {
 

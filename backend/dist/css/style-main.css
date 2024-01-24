@@ -207,7 +207,7 @@ p.text.text-danger{ color:#a94442 !important; font-weight:normal !important; fon
 font-family: 'Roboto','Source Sans Pro','Helvetica Neue',Helvetica,Arial,sans-serif; margin:0;}
 p.text.text-info{ color:#333 !important; font-weight:normal !important; font-size: 12px !important;height:100%;
 font-family: 'Roboto','Source Sans Pro','Helvetica Neue',Helvetica,Arial,sans-serif; margin:0;}
-
+.profile-input {width: 200px !important; text-align: left !important;}
 .search-form .input-group{margin-top: 3px;}
 @media (max-width:767px){
 .text-sm-left{text-align: left;}
