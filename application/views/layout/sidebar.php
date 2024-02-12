@@ -37,7 +37,6 @@ if (!empty($side_list)) {
         }
         if ($module_access) {
             if ($this->module_lib->hasModule($side_list_value->short_code) && $this->module_lib->hasActive($side_list_value->short_code)) {
-
                 ?>
 
                     <li class="treeview <?php echo activate_main_menu($side_list_value->activate_menu); ?>">

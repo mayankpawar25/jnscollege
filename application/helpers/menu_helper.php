@@ -156,6 +156,8 @@ if (!function_exists('main_menu_array')) {
                 'feesforward'    => array('index'),                               
                 'feereminder'    => array('setting'), 
                 'offlinepayment' => array('index'), 				
+                'feebreakups'    => array('index'), 				
+                'breakupmaster'  => array('index'), 				
             ), 
             
             'income' => array(                                 
@@ -388,6 +390,9 @@ if (!function_exists('activate_main_menu')) {
         $method = $CI->router->fetch_method();
 
         $return_array = main_menu_array($menu);
+        // echo '<pre>';
+        // print_r($return_array);
+        // die;
         if ($return_array) {
             if (array_key_exists($class, $return_array)) {
                 $a = $return_array[$class];
