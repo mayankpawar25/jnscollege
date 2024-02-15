@@ -28,17 +28,14 @@ class Feebreakups extends Admin_Controller
         $data['feemasterList'] = $feegroup_result;
 
         if($this->input->post('fee_groups_id')) {
-            $feebreakups_feegroup = $this->feebreakup_feegroup_model->get();
+            $feebreakups_feegroup = $this->feebreakup_feegroup_model->getByGroupId($this->input->post('fee_groups_id'));
             $data['feebreakups_feegroup'] = $feebreakups_feegroup;
-
-            echo "<pre>";
-            print_r($feebreakups_feegroup);
-            die;
+            $data['fee_groups_id'] = $this->input->post('fee_groups_id');
         }
 
         $data['breakups'] =  $this->breakup_master_model->get();
 
-        $this->form_validation->set_rules('feetype_id', $this->lang->line('fee_type'), 'required');
+        $this->form_validation->set_rules('fee_breakup_id', $this->lang->line('fee_type'), 'required');
         $this->form_validation->set_rules('amount', $this->lang->line('amount'), 'required|numeric');
 
         $this->form_validation->set_rules(
@@ -47,16 +44,6 @@ class Feebreakups extends Admin_Controller
                 array('check_exists', array($this->feesessiongroup_model, 'valid_check_exists')),
             )
         );
-
-        if (isset($_POST['account_type']) && $_POST['account_type'] == 'fix') {
-            $this->form_validation->set_rules('fine_amount', $this->lang->line('fix_amount'), 'required|numeric');
-            $this->form_validation->set_rules('due_date', $this->lang->line('due_date'), 'trim|required|xss_clean');
-
-        } elseif (isset($_POST['account_type']) && ($_POST['account_type'] == 'percentage')) {
-            $this->form_validation->set_rules('fine_percentage', $this->lang->line('percentage'), 'required|numeric');
-            $this->form_validation->set_rules('fine_amount', $this->lang->line('fix_amount'), 'required|numeric');
-            $this->form_validation->set_rules('due_date', $this->lang->line('due_date'), 'trim|required|xss_clean');
-        }
 
         if ($this->form_validation->run() == false) {
 
@@ -69,19 +56,15 @@ class Feebreakups extends Admin_Controller
             }
             
             $insert_array = array(
-                'fee_groups_id'   => $this->input->post('fee_groups_id'),
-                'feetype_id'      => $this->input->post('feetype_id'),
-                'amount'          => convertCurrencyFormatToBaseAmount($this->input->post('amount')),
-                'due_date'        => $this->customlib->dateFormatToYYYYMMDD($this->input->post('due_date')),
+                'feegroup_id'     => $this->input->post('fee_groups_id'),
                 'session_id'      => $this->setting_model->getCurrentSession(),
-                'fine_type'       => $this->input->post('account_type'),
-                'fine_percentage' => $this->input->post('fine_percentage'),
-                'fine_amount'     => $fine_amount,
+                'feebreakup_id'   => $this->input->post('fee_breakup_id'),
+                'amount'          => convertCurrencyFormatToBaseAmount($this->input->post('amount'))
             );
-
-            $feegroup_result = $this->feesessiongroup_model->add($insert_array);
+            
+            $feegroup_result = $this->feebreakup_feegroup_model->add($insert_array);
             $this->session->set_flashdata('msg', '<div class="alert alert-success text-left">' . $this->lang->line('success_message') . '</div>');
-            redirect('admin/feemaster/index');
+            redirect('admin/feebreakups/index');
         }
 
         $this->load->view('layout/header', $data);

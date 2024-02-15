@@ -38,6 +38,31 @@ class Feebreakup_feegroup_model extends MY_Model
         // }
     }
 
+    public function getByGroupId($id = null)
+    {
+        $this->db->select()->from('fee_breakup_fee_group');
+        if ($id != null) {
+            $this->db->where('feegroup_id', $id);
+        } else {
+            $this->db->order_by('id');
+        }
+        $query = $this->db->get();
+        $result = $query->result();
+
+        foreach ($result as $key => $value) {
+            $value->breakup = $this->breakup_master_model->get($value->feebreakup_id);
+            $value->group = $this->feegroup_model->get($value->feegroup_id);
+            $value->group['type'] = $this->feegrouptype_model->getfeeTypeByGroup($value->feegroup_id);
+        }
+
+        return $result;
+        // if ($id != null) {
+        //     return $query->row_array();
+        // } else {
+        //     return $query->result_array();
+        // }
+    }
+
     /**
      * This function will delete the record based on the id
      * @param $id
@@ -78,13 +103,13 @@ class Feebreakup_feegroup_model extends MY_Model
         //=======================Code Start===========================
         if (isset($data['id'])) {
             $this->db->where('id', $data['id']);
-            $this->db->update('fee_groups', $data);
+            $this->db->update('fee_breakup_fee_group', $data);
             $message   = UPDATE_RECORD_CONSTANT . " On  fee group id " . $data['id'];
             $action    = "Update";
             $record_id = $id = $data['id'];
             $this->log($message, $record_id, $action);
         } else {
-            $this->db->insert('fee_groups', $data);
+            $this->db->insert('fee_breakup_fee_group', $data);
             $id        = $this->db->insert_id();
             $message   = INSERT_RECORD_CONSTANT . " On  fee group id " . $id;
             $action    = "Insert";
