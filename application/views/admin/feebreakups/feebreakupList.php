@@ -185,8 +185,8 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        var account_type = "<?php echo set_value('account_type', 0); ?>";
-        load_disable(account_type);
+        // var account_type = "<?php echo set_value('account_type', 0); ?>";
+        // load_disable(account_type);
     });
     
     $(document).on('change', '#fee_groups_id', function() {
@@ -194,14 +194,14 @@
     })
 
     $(document).ready(function () {
-        $('.detail_popover').popover({
-            placement: 'right',
-            trigger: 'hover',
-            container: 'body',
-            html: true,
-            content: function () {
-                return $(this).closest('td').find('.fee_detail_popover').html();
-            }
-        });
+        // $('.detail_popover').popover({
+        //     placement: 'right',
+        //     trigger: 'hover',
+        //     container: 'body',
+        //     html: true,
+        //     content: function () {
+        //         return $(this).closest('td').find('.fee_detail_popover').html();
+        //     }
+        // });
     });
 </script>

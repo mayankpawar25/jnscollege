@@ -73,7 +73,7 @@ class Feebreakup_feegroup_model extends MY_Model
         $this->db->trans_strict(false); # See Note 01. If you wish can remove as well
         //=======================Code Start===========================
         $this->db->where('id', $id);
-        $this->db->delete('fee_groups');
+        $this->db->delete('fee_breakup_fee_group');
         $message   = DELETE_RECORD_CONSTANT . " On  fee group id " . $id;
         $action    = "Delete";
         $record_id = $id;
@@ -152,7 +152,7 @@ class Feebreakup_feegroup_model extends MY_Model
     {
         $this->db->where('name', $name);
         $this->db->where('id !=', $id);
-        $query = $this->db->get('fee_groups');
+        $query = $this->db->get('fee_breakup_fee_group');
         if ($query->num_rows() > 0) {
             return true;
         } else {
@@ -163,7 +163,7 @@ class Feebreakup_feegroup_model extends MY_Model
     public function checkGroupExistsByName($name)
     {
         $this->db->where('name', $name);
-        $query = $this->db->get('fee_groups');
+        $query = $this->db->get('fee_breakup_fee_group');
         if ($query->num_rows() > 0) {
             return $query->row();
         } else {

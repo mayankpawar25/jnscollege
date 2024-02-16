@@ -78,15 +78,8 @@ class Feebreakups extends Admin_Controller
             access_denied();
         }
         $data['title'] = $this->lang->line('fees_master_list');
-        $this->feegrouptype_model->remove($id);
-        redirect('admin/feemaster/index');
-    }
-
-    public function deletegrp($id)
-    {
-        $data['title'] = $this->lang->line('fees_master_list');
-        $this->feesessiongroup_model->remove($id);
-        redirect('admin/feemaster');
+        $this->feebreakup_feegroup_model->remove($id);
+        redirect('admin/feebreakups/index');
     }
 
     public function edit($id)
@@ -147,7 +140,7 @@ class Feebreakups extends Admin_Controller
             $feegroup_result = $this->feegrouptype_model->add($insert_array);
 
             $this->session->set_flashdata('msg', '<div class="alert alert-success text-left">' . $this->lang->line('update_message') . '</div>');
-            redirect('admin/feemaster/index');
+            redirect('admin/feebreakups/index');
         }
     }
 

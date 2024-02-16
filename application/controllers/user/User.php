@@ -246,6 +246,9 @@ class User extends Student_Controller
             $data['category_list']        = $category_list;
             $data['gradeList']            = $gradeList;
             $data['student']              = $student;
+            
+            // get student class, section and class teachers
+            $data['student_class_teacher']= $this->classteacher_model->teacherByClassSection($student['class_id'], $student['section_id']);
 
             $startmonth = $this->setting_model->getStartMonth();
 

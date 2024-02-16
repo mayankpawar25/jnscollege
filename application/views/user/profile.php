@@ -90,6 +90,18 @@ foreach ($unread_notifications as $notice_key => $notice_value) {
                         <b><?php echo $this->lang->line('gender'); ?></b> <a class="pull-right text-aqua"> <?php echo $this->lang->line(strtolower($student['gender'])); ?></a>
                      </li>
 
+                     <li class="list-group-item">
+                        <b><?php echo $this->lang->line('class_teacher'); ?></b> <a class="pull-right text-aqua"> <?php echo $student_class_teacher[0]['name'] . ' ' . $student_class_teacher[0]['surname']; ?></a>
+                     </li>
+
+                     <li class="list-group-item">
+                        <b><?php echo $this->lang->line('class_teacher') .' '. $this->lang->line('mobile_no') ; ?></b> <a class="pull-right text-aqua"> <?php echo $student_class_teacher[0]['contact_no'] ?></a>
+                     </li>
+
+                     <li class="list-group-item">
+                        <b><?php echo $this->lang->line('class_teacher') .' '. $this->lang->line('email') ; ?></b> <a class="pull-right text-aqua"> <?php echo $student_class_teacher[0]['email'] ?></a>
+                     </li>
+
                      <?php if($sch_setting->student_barcode == 1) { ?>
                          <li class="list-group-item listnoback">
                              <b><?php echo $this->lang->line('barcode'); ?></b> 
