@@ -872,6 +872,7 @@ $lang['fees_group_list'] = "Fees Group List";
 $lang['fees_list'] = "Fees List";	
 $lang['fees_master'] = "Fees Master";	
 $lang['fees_master_list'] = "Fees Master List";	
+$lang['fees_structure'] = "Fees Stucture";	
 $lang['breakup_list'] = "Breakup List";	
 $lang['add_breakup_list'] = "Add Breakup List";	
 $lang['breakup_name'] = "Breakup Name";	
