@@ -23,7 +23,7 @@
                     <!-- Horizontal Form -->
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title"><?php echo $this->lang->line('add_fees_master') . " : " . $this->setting_model->getCurrentSessionName(); ?></h3>
+                            <h3 class="box-title"><?php echo $this->lang->line('fees_breakup') . " : " . $this->setting_model->getCurrentSessionName(); ?></h3>
                         </div><!-- /.box-header -->
                         <form action="<?php echo base_url() ?>admin/feebreakups"  id="feebreakupsform" name="feebreakupsform" method="post" accept-charset="utf-8">
                             <div class="box-body">
@@ -74,7 +74,7 @@
                                                 }
                                                 ?>
                                             </select>
-                                            <span class="text-danger"><?php echo form_error('fee_groups_id'); ?></span>
+                                            <span class="text-danger"><?php echo form_error('fee_breakup_id'); ?></span>
                                         </div>
                                         <div class="form-group">
                                             <label for="exampleInputEmail1"><?php echo $this->lang->line('amount'); ?> (<?php echo $currency_symbol; ?>)</label><small class="req"> *</small>
@@ -102,7 +102,7 @@
                 <!-- Horizontal Form -->
                 <div class="box box-primary">
                     <div class="box-header ptbnull">
-                        <h3 class="box-title titlefix"><?php echo $this->lang->line('fees_master_list') . " : " . $this->setting_model->getCurrentSessionName(); ?></h3>
+                        <h3 class="box-title titlefix"><?php echo $this->lang->line('fees_breakup') . " : " . $this->setting_model->getCurrentSessionName(); ?></h3>
                     </div><!-- /.box-header -->
                     <div class="box-body">
                         <div class="download_label"><?php echo $this->lang->line('fees_master_list') . " : " . $this->setting_model->getCurrentSessionName(); ?></div>
@@ -184,24 +184,7 @@
 </div><!-- /.content-wrapper -->
 
 <script type="text/javascript">
-    $(document).ready(function () {
-        // var account_type = "<?php echo set_value('account_type', 0); ?>";
-        // load_disable(account_type);
-    });
-    
     $(document).on('change', '#fee_groups_id', function() {
         $('form#feebreakupsform').submit();
     })
-
-    $(document).ready(function () {
-        // $('.detail_popover').popover({
-        //     placement: 'right',
-        //     trigger: 'hover',
-        //     container: 'body',
-        //     html: true,
-        //     content: function () {
-        //         return $(this).closest('td').find('.fee_detail_popover').html();
-        //     }
-        // });
-    });
 </script>

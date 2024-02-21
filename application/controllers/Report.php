@@ -16,6 +16,7 @@ class Report extends Admin_Controller
         $this->search_type        = $this->customlib->get_searchtype();
         $this->sch_setting_detail = $this->setting_model->getSetting();
         $this->load->library('media_storage');
+        $this->load->model(array('breakup_master_model', 'feebreakup_feegroup_model'));
     }
 
     public function pdfStudentFeeRecord()
@@ -2549,4 +2550,89 @@ class Report extends Admin_Controller
         echo json_encode($json_data);
     }
     
+    public function feestructure()
+    {
+        $this->session->set_userdata('top_menu', 'Reports');
+        $this->session->set_userdata('sub_menu', 'Reports/student_information');
+        $this->session->set_userdata('subsub_menu', '');
+        $this->load->view('layout/header');
+        $this->load->view('reports/feestructureinformation');
+        $this->load->view('layout/footer');
+    }
+
+    public function fee_structure_report()
+    {
+        $this->session->set_userdata('top_menu', 'Reports');
+        $this->session->set_userdata('sub_menu', 'Reports/online_admission');
+        $this->session->set_userdata('subsub_menu', 'Reports/online_admission');
+        $fees_groups = $this->feegroup_model->get();
+        $data['fees_groups'] = $fees_groups;
+        $this->load->view('layout/header', $data);
+        $this->load->view('reports/fee_structure_report', $data);
+        $this->load->view('layout/footer', $data);
+    }
+
+    public function checkfeevalidation()
+    {
+        $fees_group_id   = $this->input->post('fees_group_id');
+        $params     = array('fees_group_id' => $fees_group_id);
+        $array      = array('status' => 1, 'error' => '', 'params' => $params);
+        echo json_encode($array);
+    }
+
+    public function dtonlinefeestructurereportlist()
+    {
+        $fees_group_id   = $this->input->post("fees_group_id");
+        // $feesessiongroupId = $this->feesessiongroup_model->group_exists($fees_group_id);
+        $feegrouptypedata = $this->feegrouptype_model->getfeeTypeByGroup($fees_group_id);
+
+        // Get all feegrouptypeIds
+        $feegrouptypeIds = [];
+        if(!empty($feegrouptypedata)) {
+            foreach($feegrouptypedata as $feegrouptype) {
+                $feegrouptypeIds[] = $feegrouptype->id;
+            }
+        }
+        $feegrouptypeIdString = "(" . implode(',', $feegrouptypeIds) . ")";
+        $studentIdData = $this->studentfeemaster_model->getStudentSessionIdByFeegroupfeetypeid($feegrouptypeIdString);
+        $result          = $this->feebreakup_feegroup_model->getByGroupIdReport($fees_group_id);
+        $resultlist      = json_decode($result);
+        // echo "<pre>";
+        // print_r($resultlist);
+        // die;
+        $studentSessionIdArr = [];
+        if(!empty($studentIdData)) {
+            foreach ($studentIdData as $studentfeeData) {
+                $student_fees = !empty($fee->amount_detail) ? json_decode($studentfeeData->amount_detail, true) : [];
+                $balance = 0;
+                foreach ($student_fees as $key => $student_fee) {
+                    $balance += $student_fee['amount'];
+                }
+                if($student_fees->amount <= $balance) {
+                    $studentSessionIdArr[] = $studentfeeData->student_session_id;
+                }
+            }
+        }
+        $studentSessionIdArr = array_unique($studentSessionIdArr);
+        $studentCount = count($studentSessionIdArr);
+        $dt_data         = array();
+        $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
+
+        if (!empty($resultlist->data)) {
+            foreach ($resultlist->data as $fee_structure) {
+                $row   = array();
+                $fee_breakup = $this->breakup_master_model->get($fee_structure->feebreakup_id);
+                $row[] = $fee_breakup['name'];
+                $row[] = $currency_symbol . ($fee_structure->amount * $studentCount);
+                $dt_data[] = $row;
+            }
+        }
+        $json_data = array(
+            "draw"            => intval($resultlist->draw),
+            "recordsTotal"    => intval($resultlist->recordsTotal),
+            "recordsFiltered" => intval($resultlist->recordsFiltered),
+            "data"            => $dt_data,
+        );
+        echo json_encode($json_data);
+    }  
 }

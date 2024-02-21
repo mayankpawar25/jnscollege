@@ -876,6 +876,7 @@ $lang['breakup_list'] = "Breakup List";
 $lang['add_breakup_list'] = "Add Breakup List";	
 $lang['breakup_name'] = "Breakup Name";	
 $lang['fees_breakup'] = "Fee Breakup";	
+$lang['fee_stucture_report'] = "Fee Structure Report";
 $lang['fees_breakup_list'] = "Fee Breakup List";	
 $lang['fees_month'] = "Fees Month";	
 $lang['fees_overview'] = "Fees Overview";	

@@ -366,7 +366,6 @@ class Studentfee extends Admin_Controller
 
     public function addfee($id)
     {
-
         if (!$this->rbac->hasPrivilege('collect_fees', 'can_view')) {
             access_denied();
         }
@@ -573,7 +572,7 @@ class Studentfee extends Admin_Controller
             $parent_app_key     = $this->input->post('parent_app_key');
             $student_session_id = $this->input->post('student_session_id');
             $inserted_id        = $this->studentfeemaster_model->fee_deposit($data, $send_to, $student_fees_discount_id);
-
+            
             $print_record = array();
             if ($action == "print") {
                 $receipt_data           = json_decode($inserted_id);
@@ -586,18 +585,18 @@ class Studentfee extends Admin_Controller
                 $setting_result         = $this->setting_model->get();
                 $data['settinglist']    = $setting_result;
 
-        if ($transport_fees_id != 0 && $fee_category == "transport") {
+                if ($transport_fees_id != 0 && $fee_category == "transport") {
 
-            $fee_record = $this->studentfeemaster_model->getTransportFeeByInvoice($receipt_data->invoice_id, $receipt_data->sub_invoice_id);
-             $data['feeList']        = $fee_record;
-                $print_record = $this->load->view('print/printTransportFeesByName', $data, true);
+                    $fee_record = $this->studentfeemaster_model->getTransportFeeByInvoice($receipt_data->invoice_id, $receipt_data->sub_invoice_id);
+                    $data['feeList']        = $fee_record;
+                        $print_record = $this->load->view('print/printTransportFeesByName', $data, true);
 
-        } else {
+                } else {
 
-             $fee_record             = $this->studentfeemaster_model->getFeeByInvoice($receipt_data->invoice_id, $receipt_data->sub_invoice_id);
-               $data['feeList']        = $fee_record;
-                $print_record = $this->load->view('print/printFeesByName', $data, true);
-        }
+                    $fee_record             = $this->studentfeemaster_model->getFeeByInvoice($receipt_data->invoice_id, $receipt_data->sub_invoice_id);
+                    $data['feeList']        = $fee_record;
+                        $print_record = $this->load->view('print/printFeesByName', $data, true);
+                }
             }
 
             $mailsms_array->invoice            = $inserted_id;
@@ -608,6 +607,27 @@ class Studentfee extends Admin_Controller
             $mailsms_array->fee_category       = $fee_category;
 
             $this->mailsmsconf->mailsms('fee_submission', $mailsms_array);
+
+            // If Complete fee paid then add contributions to fee breakups
+            // $studentTransaction = $this->studentfeemaster_model->getStudentFees($student_session_id);
+            // $totalFees = 0;
+            // $balance = 0;
+            // if(!empty($studentTransaction)) {
+            //     foreach ($studentTransaction[0]->fees as $fee) {
+            //         $totalFees += $fee->amount;
+            //         $student_fees = !empty($fee->amount_detail) ? json_decode($fee->amount_detail, true) : [];
+            //         foreach ($student_fees as $key => $student_fee) {
+            //             $balance += $student_fee['amount'];
+            //         }
+            //     }
+
+            //     if($totalFees - $balance <= 0){
+            //         // Code to add funds to fee breakups
+            //         echo "<pre>";
+            //         print_r($studentTransaction);
+            //         die;
+            //     }
+            // }
 
             $array = array('status' => 'success', 'error' => '', 'print' => $print_record);
             echo json_encode($array);

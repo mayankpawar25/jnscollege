@@ -63,6 +63,39 @@ class Feebreakup_feegroup_model extends MY_Model
         // }
     }
 
+    public function getByGroupIdReport($id = null)
+    {
+        $this->datatables
+            ->select('*')
+            ->from('fee_breakup_fee_group');
+        if ($id != null) {
+            $this->datatables->where('feegroup_id', $id);
+        } else {
+            $this->datatables->order_by('id');
+        }
+
+        // $this->datatables
+        //     ->select('fee_breakup_fee_group.*, 
+        //             feebreakups_master.name as feebreakup_name, 
+        //             fee_groups.*, 
+        //             feetype.type as feetype_type, 
+        //             feetype.code as feetype_code')
+        //     ->from('fee_breakup_fee_group')
+        //     ->join('feebreakups_master', 'fee_breakup_fee_group.feebreakup_id = feebreakups_master.id', 'left')
+        //     ->join('fee_groups', 'fee_breakup_fee_group.feegroup_id = fee_groups.id', 'left')
+        //     ->join('fee_groups_feetype', 'fee_breakup_fee_group.feegroup_id = fee_groups_feetype.fee_groups_id', 'left')
+        //     ->join('feetype', 'fee_groups_feetype.feetype_id = feetype.id', 'left');
+
+        if ($id != null) {
+            $this->datatables->where('fee_breakup_fee_group.feegroup_id', $id);
+        } else {
+            $this->datatables->order_by('fee_breakup_fee_group.id');
+        }
+        
+        $this->datatables->sort('fee_breakup_fee_group.id', 'asc');
+        return $this->datatables->generate('json');
+    }
+
     /**
      * This function will delete the record based on the id
      * @param $id
