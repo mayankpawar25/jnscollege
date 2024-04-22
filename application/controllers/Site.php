@@ -608,4 +608,29 @@ class Site extends Public_Controller
         echo $captcha['image'];
     }
 
+    public function privacyPolicy() {
+        $data               = array();
+        $app_name = $this->setting_model->get();
+        $data['app_name'] = $app_name;
+        $data['title']      = 'Privacy Policy';
+        $data['name']       = $app_name[0]['name'];
+        $data['school']     = $app_name[0];
+        $is_captcha         = $this->captchalib->is_captcha('userlogin');
+        $data["is_captcha"] = $is_captcha;
+        $this->load->view('privacypolicy', $data);
+    }
+
+    public function contactUs() {
+        $data               = array();
+        $app_name = $this->setting_model->get();
+        $data['app_name'] = $app_name;
+        $data['title'] = 'Contact Us';
+        
+        $data['title']      = 'Privacy Policy';
+        $data['name']       = $app_name[0]['name'];
+        $data['school']     = $app_name[0];
+        $is_captcha         = $this->captchalib->is_captcha('userlogin');
+        $data["is_captcha"] = $is_captcha;
+        $this->load->view('contactus', $data);
+    }
 }

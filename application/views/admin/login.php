@@ -87,7 +87,14 @@
                                             <?php } ?>
                                             <button type="submit" class="btn"><?php echo $this->lang->line('sign_in'); ?></button>
                                         </form>
-                                        <a href="<?php echo site_url('site/forgotpassword') ?>" class="forgot"><i class="fa fa-key"></i> <?php echo $this->lang->line('forgot_password'); ?>?</a>
+                                        <!-- Additional hyperlinks for Privacy Policy and Contact Us -->
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <a href="<?php echo site_url('site/forgotpassword') ?>" class="forgot"><i class="fa fa-key"></i> <?php echo $this->lang->line('forgot_password'); ?>? |</a>
+                                                <a href="<?php echo site_url('site/privacyPolicy') ?>" class="forgot"> Privacy Policy |</a> 
+                                                <a href="<?php echo site_url('site/contactUs') ?>" class="forgot"> Contact Us</a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
