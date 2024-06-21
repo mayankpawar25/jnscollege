@@ -2350,3 +2350,4 @@ $lang['your_remark'] = "Your Remark";
 $lang['your_transaction_has_failed_due_to_some_technical_error'] = "Your Transaction Has Failed Due To Some Technical Error.";	
 $lang['youtube_link'] = "YouTube Link";	
 $lang['youtube_url'] = "Youtube URL";
+$lang['yojna'] ="Yojna";

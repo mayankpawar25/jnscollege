@@ -2127,6 +2127,7 @@ class Report extends Admin_Controller
         $userdata                = $this->customlib->getUserData();
         $category                = $this->category_model->get();
         $data['categorylist']    = $category;
+       
         $this->load->view('layout/header', $data);
         $this->load->view('reports/studentReport', $data);
         $this->load->view('layout/footer', $data);
@@ -2139,6 +2140,7 @@ class Report extends Admin_Controller
         $section_id  = $this->input->post('section_id');
         $category_id = $this->input->post('category_id');
         $gender      = $this->input->post('gender');
+        $yojna      = $this->input->post('yojna');
         $rte         = $this->input->post('rte');
 
         $srch_type = $this->input->post('search_type');
@@ -2148,7 +2150,7 @@ class Report extends Admin_Controller
             $this->form_validation->set_rules('class_id', $this->lang->line('class'), 'trim|required|xss_clean');
             if ($this->form_validation->run() == true) {
 
-                $params = array('srch_type' => $srch_type, 'class_id' => $class_id, 'section_id' => $section_id, 'category_id' => $category_id, 'gender' => $gender, 'rte' => $rte);
+                $params = array('srch_type' => $srch_type, 'class_id' => $class_id, 'section_id' => $section_id, 'category_id' => $category_id, 'gender' => $gender, 'yojna'  => $yojna, 'rte' => $rte);
                 $array  = array('status' => 1, 'error' => '', 'params' => $params);
                 echo json_encode($array);
 
@@ -2174,9 +2176,11 @@ class Report extends Admin_Controller
         $category_id     = $this->input->post('category_id');
         $gender          = $this->input->post('gender');
         $rte             = $this->input->post('rte');
+        $yojna           = $this->input->post('yojna');
         $sch_setting     = $this->sch_setting_detail;
 
-        $result     = $this->student_model->searchdatatableByClassSectionCategoryGenderRte($class, $section, $category_id, $gender, $rte);
+        $result     = $this->student_model->searchdatatableByClassSectionCategoryGenderRte($class, $section, $category_id, $gender, $yojna, $rte);
+
         $resultlist = json_decode($result);
         $dt_data    = array();
         if (!empty($resultlist->data)) {
@@ -2597,9 +2601,7 @@ class Report extends Admin_Controller
         $studentIdData = $this->studentfeemaster_model->getStudentSessionIdByFeegroupfeetypeid($feegrouptypeIdString);
         $result          = $this->feebreakup_feegroup_model->getByGroupIdReport($fees_group_id);
         $resultlist      = json_decode($result);
-        // echo "<pre>";
-        // print_r($resultlist);
-        // die;
+
         $studentSessionIdArr = [];
         if(!empty($studentIdData)) {
             foreach ($studentIdData as $studentfeeData) {

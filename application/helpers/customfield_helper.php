@@ -76,7 +76,7 @@ if (!function_exists('display_custom_fields')) {
 
         return $fields_html;
     }
-    
+
     function display_admission_custom_fields($belongs_to, $rel_id = false, $where = array())
     {
         $CI = &get_instance();
@@ -93,10 +93,9 @@ if (!function_exists('display_custom_fields')) {
             $type = $field['type'];
 
             $label      = ucfirst($field['name']);
-          
-            
-            if($CI->customlib->getfieldstatus($field['name']))
-            {
+
+
+            if ($CI->customlib->getfieldstatus($field['name'])) {
                 $field_name = 'custom_fields[' . $field['belong_to'] . '][' . $field['id'] . ']';
                 if ($field['bs_column'] == '' || $field['bs_column'] == 0) {
                     $field['bs_column'] = 12;
@@ -148,8 +147,6 @@ if (!function_exists('display_custom_fields')) {
                 }
                 $fields_html .= '</div>';
             }
-
-           
         }
 
         return $fields_html;
@@ -238,7 +235,6 @@ if (!function_exists('display_custom_fields')) {
         $input .= '<option value="">Select</option>';
         foreach ($options as $option_key => $option_value) {
             $input .= '<option value="' . $option_value . '" ' . set_select($name, $option_value, (set_value($name, $value) == $option_value) ? true : false) . '>' . $option_value . '</option>';
-
         }
         $input .= '</select>';
         $input .= '<span class="text-danger">' . form_error($name) . '</span>';
@@ -276,7 +272,6 @@ if (!function_exists('display_custom_fields')) {
                 } else {
                     $chk_status = false;
                 }
-
             } elseif ($value != "" && in_array($option_value, explode(",", $value))) {
                 $chk_status = true;
             } else {
@@ -322,7 +317,6 @@ if (!function_exists('display_custom_fields')) {
                 } else {
                     $chk_status = false;
                 }
-
             } elseif ($value != "" && in_array($option_value, explode(",", $value))) {
                 $chk_status = true;
             } else {
@@ -474,7 +468,6 @@ if (!function_exists('display_custom_fields')) {
     function removeBreak($option_value)
     {
         return preg_replace('/<br\\s*?\\/?>\\s*$/', '', $option_value);
-
     }
 
     function get_custom_table_values($table_id, $belongs_to)
@@ -488,6 +481,7 @@ if (!function_exists('display_custom_fields')) {
 
     function get_custom_print_table_values($table_id, $belongs_to)
     {
+
         $CI  = &get_instance();
         $sql = 'SELECT custom_field_values.*,custom_fields.name,custom_fields.type,custom_fields.belong_to  FROM `custom_field_values` RIGHT JOIN custom_fields on custom_fields.id=custom_field_values.custom_field_id  and belong_table_id=' . $CI->db->escape($table_id) . ' WHERE custom_fields.belong_to=' . $CI->db->escape($belongs_to) . ' AND custom_fields.visible_on_table=1 ORDER by custom_fields.weight asc';
 
@@ -554,8 +548,8 @@ if (!function_exists('display_custom_fields')) {
 
     function get_onlineadmission_editable_fields()
     {
-         $fields = array(
-            
+        $fields = array(
+
             'middlename'                 => lang('middle_name'),
             'lastname'                   => lang('last_name'),
             'category'                   => lang('category'),
@@ -594,8 +588,8 @@ if (!function_exists('display_custom_fields')) {
             'local_identification_no'    => lang('local_identification_number'),
             'rte'                        => lang('rte'),
             'previous_school_details'    => lang('previous_school_details'),
-            'student_note'               => lang('note'),        
-            'upload_documents'           => lang('upload_documents')         
+            'student_note'               => lang('note'),
+            'upload_documents'           => lang('upload_documents')
         );
         return $fields;
     }
@@ -616,10 +610,9 @@ if (!function_exists('display_custom_fields')) {
             $type = $field['type'];
 
             $label      = ucfirst($field['name']);
-          
-            
-            if($CI->customlib->getfieldstatus($field['name']))
-            {
+
+
+            if ($CI->customlib->getfieldstatus($field['name'])) {
                 $field_name = 'custom_fields[' . $field['belong_to'] . '][' . $field['id'] . ']';
                 if ($field['bs_column'] == '' || $field['bs_column'] == 0) {
                     $field['bs_column'] = 12;
@@ -671,8 +664,6 @@ if (!function_exists('display_custom_fields')) {
                 }
                 $fields_html .= '</div>';
             }
-
-           
         }
 
         return $fields_html;
@@ -695,8 +686,8 @@ if (!function_exists('display_custom_fields')) {
         $query = $CI->db->query($sql);
         return $query->result();
     }
-    
-    
+
+
     function display_custom_fields_student_penal_edit_profile($belongs_to, $rel_id = false, $where = array())
     {
         $CI = &get_instance();
@@ -709,66 +700,75 @@ if (!function_exists('display_custom_fields')) {
         $fields_html = '';
 
         foreach ($result as $result_key => $field) {
-            
-         if($CI->customlib->checkprofilesettingfieldexist($field['name']))
-            {
-            $type = $field['type'];
 
-            $label      = ucfirst($field['name']);
-            $field_name = 'custom_fields[' . $field['belong_to'] . '][' . $field['id'] . ']';
-            if ($field['bs_column'] == '' || $field['bs_column'] == 0) {
-                $field['bs_column'] = 12;
-            }
-            $input_class = "";
-            $value       = "";
-            if ($rel_id !== false) {
+            if ($CI->customlib->checkprofilesettingfieldexist($field['name'])) {
+                $type = $field['type'];
 
-                $return_value = get_custom_field_value($rel_id, $field['id'], $belongs_to);
-                if (!empty($return_value)) {
-                    $value = $return_value->field_value;
+                $label      = ucfirst($field['name']);
+                $field_name = 'custom_fields[' . $field['belong_to'] . '][' . $field['id'] . ']';
+                if ($field['bs_column'] == '' || $field['bs_column'] == 0) {
+                    $field['bs_column'] = 12;
                 }
+                $input_class = "";
+                $value       = "";
+                if ($rel_id !== false) {
+
+                    $return_value = get_custom_field_value($rel_id, $field['id'], $belongs_to);
+                    if (!empty($return_value)) {
+                        $value = $return_value->field_value;
+                    }
+                }
+
+                $fields_html .= '<div class="col-md-' . $field['bs_column'] . '">';
+                if ($field['type'] == 'input' || $field['type'] == 'number') {
+                    $type = $field['type'] == 'input' ? 'text' : 'number';
+                    $fields_html .= render_input_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
+                } elseif ($field['type'] == 'textarea') {
+                    $fields_html .= render_textarea_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
+                } elseif ($field['type'] == 'select') {
+
+                    $options = optionSplit($field['field_values']);
+
+                    $fields_html .= render_select_field($field_name, $options, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
+                } elseif ($field['type'] == 'multiselect') {
+                    $options = optionSplit($field['field_values']);
+                    $fields_html .= render_multiselect_field($field_name, $options, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
+                } elseif ($field['type'] == 'checkbox') {
+
+                    $options = optionSplit($field['field_values']);
+                    $fields_html .= render_checkbox_field($field_name, $options, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
+                } elseif ($field['type'] == 'date_picker') {
+
+                    $type = $field['type'];
+                    $fields_html .= render_date_picker_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
+                } elseif ($field['type'] == 'date_picker_time') {
+
+                    $type = $field['type'];
+                    $fields_html .= render_date_picker_time_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
+                } elseif ($field['type'] == 'colorpicker') {
+
+                    $type = $field['type'];
+                    $fields_html .= render_colorpicker_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
+                } elseif ($field['type'] == 'link') {
+
+                    $type = $field['type'];
+                    $fields_html .= render_link_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
+                }
+                $fields_html .= '</div>';
             }
-
-            $fields_html .= '<div class="col-md-' . $field['bs_column'] . '">';
-            if ($field['type'] == 'input' || $field['type'] == 'number') {
-                $type = $field['type'] == 'input' ? 'text' : 'number';
-                $fields_html .= render_input_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
-            } elseif ($field['type'] == 'textarea') {
-                $fields_html .= render_textarea_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
-            } elseif ($field['type'] == 'select') {
-
-                $options = optionSplit($field['field_values']);
-
-                $fields_html .= render_select_field($field_name, $options, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
-            } elseif ($field['type'] == 'multiselect') {
-                $options = optionSplit($field['field_values']);
-                $fields_html .= render_multiselect_field($field_name, $options, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
-            } elseif ($field['type'] == 'checkbox') {
-
-                $options = optionSplit($field['field_values']);
-                $fields_html .= render_checkbox_field($field_name, $options, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
-            } elseif ($field['type'] == 'date_picker') {
-
-                $type = $field['type'];
-                $fields_html .= render_date_picker_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
-            } elseif ($field['type'] == 'date_picker_time') {
-
-                $type = $field['type'];
-                $fields_html .= render_date_picker_time_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
-            } elseif ($field['type'] == 'colorpicker') {
-
-                $type = $field['type'];
-                $fields_html .= render_colorpicker_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
-            } elseif ($field['type'] == 'link') {
-
-                $type = $field['type'];
-                $fields_html .= render_link_field($field_name, $field['belong_to'], $field['id'], $field['validation'], $label, $value, $type, $input_class);
-            }
-            $fields_html .= '</div>';
-        }
-        
         }
 
         return $fields_html;
+    }
+}
+
+if (!function_exists('get_custom_yojna_value')) {
+    function get_custom_yojna_value($custom_field_id)
+    {
+        
+        $CI  = &get_instance();
+        $sql = 'SELECT DISTINCT `field_value` FROM `custom_field_values` WHERE `field_value` != "" and `field_value` != "Null" and  `custom_field_id` = ' . $CI->db->escape($custom_field_id);
+        $query = $CI->db->query($sql);
+        return $query->result();
     }
 }

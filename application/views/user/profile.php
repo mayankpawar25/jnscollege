@@ -2372,9 +2372,12 @@ if ($consolidate_exam_result_percentage) {
                     <option value="Upload 10th Class Marksheet">Upload 10th Class Marksheet</option>
                     <option value="Upload 12th Class Marksheet">Upload 12th Class Marksheet</option>
                     <option value="Upload Caste Certificate">Upload Caste Certificate</option>
-                    <option value="Upload Domicile certificate">Upload Domicile certificate</option>
-                    <option value="Upload Income certificate">Upload Income certificate</option>
-                    <option value="Upload Student Aadhar card">Upload Student Aadhar card</option>
+                    <option value="Upload Domicile certificate">Upload Domicile Certificate</option>
+                    <option value="Upload Income certificate">Upload Income Certificate</option>
+                    <option value="Upload Student Aadhar card">Upload Student Aadhar Card</option>
+                    <option value="Upload Student Admission fees">Upload Student Admission Fees Receipt</option>
+                    <option value="Upload Student FI">Upload Student FI Receipt</option>
+                    <option value="Upload Student SI">Upload Student SI Receipt</option>
                   </select>
                   <span class="text-danger"><?php echo form_error('first_title'); ?></span>
                </div>
