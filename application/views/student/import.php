@@ -124,7 +124,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                     </div>
                     <hr /> -->
 
-                    <form action="<?php echo site_url('student/import') ?>" id="employeeform" name="employeeform" method="post" enctype="multipart/form-data">
+                    <form action="<?php echo site_url('student/import') ?>" name="employeeform" method="post" enctype="multipart/form-data">
                         <div class="box-body">
                             <?php echo $this->customlib->getCSRF(); ?>
                             <div class="row">

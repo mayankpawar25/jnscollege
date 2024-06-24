@@ -763,11 +763,13 @@ if (!function_exists('display_custom_fields')) {
 }
 
 if (!function_exists('get_custom_yojna_value')) {
-    function get_custom_yojna_value($custom_field_id)
-    {
-        
+    function get_custom_yojna_value($custom_field_name)
+    {     
         $CI  = &get_instance();
-        $sql = 'SELECT DISTINCT `field_value` FROM `custom_field_values` WHERE `field_value` != "" and `field_value` != "Null" and  `custom_field_id` = ' . $CI->db->escape($custom_field_id);
+        $sql = 'SELECT DISTINCT custom_field_values.field_value FROM `custom_field_values` LEFT JOIN custom_fields on custom_fields.id=custom_field_values.custom_field_id WHERE custom_field_values.field_value != "" and custom_field_values.field_value != "Null" and custom_fields.name =  ' . $CI->db->escape(strtolower(trim($custom_field_name)));
+
+        // $sql = 'SELECT DISTINCT `field_value` FROM `custom_field_values` RIGHT JOIN custom_fields on custom_fields.id=custom_field_values.custom_field_id  WHERE `field_value` != "" and `field_value` != "Null" and  `name` = ' . $CI->db->escape(trim($custom_field_id));
+        // echo $sql;
         $query = $CI->db->query($sql);
         return $query->result();
     }

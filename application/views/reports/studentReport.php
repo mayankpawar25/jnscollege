@@ -97,7 +97,7 @@
                                             <option value=""><?php echo $this->lang->line('select'); ?></option>
                                             <?php
                                           
-                                            foreach (get_custom_yojna_value(7) as $key => $value) {
+                                            foreach (get_custom_yojna_value('yojna') as $key => $value) {
                                             ?>
                                                 <option value="<?php echo $value->field_value; ?>" <?php if (set_value('yojna') == $key) {
                                                                                         echo "selected";
