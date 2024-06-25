@@ -159,6 +159,7 @@ class Feemaster extends Admin_Controller
 
     public function assign($id)
     {
+       
         if (!$this->rbac->hasPrivilege('fees_group_assign', 'can_view')) {
             access_denied();
         }
@@ -187,8 +188,11 @@ class Feemaster extends Admin_Controller
             $data['rte_status']  = $this->input->post('rte');
             $data['class_id']    = $this->input->post('class_id');
             $data['section_id']  = $this->input->post('section_id');
+            $data['yojna']       = $this->input->post('yojna');
 
-            $resultlist         = $this->studentfeemaster_model->searchAssignFeeByClassSection($data['class_id'], $data['section_id'], $id, $data['category_id'], $data['gender'], $data['rte_status']);
+
+            $resultlist         = $this->studentfeemaster_model->searchAssignFeeByClassSection($data['class_id'], $data['section_id'], $id, $data['category_id'], $data['gender'], $data['rte_status'],  $data['yojna']);
+           
             $data['resultlist'] = $resultlist;
         }
 
