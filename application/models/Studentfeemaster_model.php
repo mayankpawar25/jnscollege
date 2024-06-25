@@ -40,7 +40,7 @@ class Studentfeemaster_model extends MY_Model
         . "ON `student_session`.`student_id` = `students`.`id` JOIN `classes` "
         . "ON `student_session`.`class_id` = `classes`.`id` JOIN `sections` "
         . "ON `sections`.`id` = `student_session`.`section_id` LEFT JOIN `categories` "
-        . "ON `students`.`category_id` = `categories`.`id` LEFT JOIN `custom_field_values` ON `custom_field_values`.`custom_field_id` = `students`.`id` LEFT JOIN student_fees_master on"
+        . "ON `students`.`category_id` = `categories`.`id` LEFT JOIN `custom_field_values` ON `custom_field_values`.`belong_table_id` = `students`.`id` LEFT JOIN student_fees_master on"
         . " student_fees_master.student_session_id=student_session.id"
         . "  AND student_fees_master.fee_session_group_id=" . $this->db->escape($fee_session_group_id)
         . "WHERE `student_session`.`session_id` =  " . $this->current_session

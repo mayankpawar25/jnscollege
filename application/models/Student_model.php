@@ -715,7 +715,7 @@ class Student_model extends MY_Model
             ->join('student_session', 'student_session.student_id = students.id')
             ->join('classes', 'student_session.class_id = classes.id')
             ->join('sections', 'sections.id = student_session.section_id')
-            ->join('custom_field_values', 'custom_field_values.custom_field_id = students.id')
+            ->join('custom_field_values', 'custom_field_values.belong_table_id = students.id')
             ->join('categories', 'students.category_id = categories.id', 'left')
             ->where('student_session.session_id', $this->current_session)
             ->where('students.is_active', 'yes')
@@ -1974,7 +1974,7 @@ class Student_model extends MY_Model
         $this->datatables->join('classes', 'student_session.class_id = classes.id');
         $this->datatables->join('sections', 'sections.id = student_session.section_id');
         $this->datatables->join('categories', 'students.category_id = categories.id', 'left');
-        $this->datatables->join('custom_field_values', 'custom_field_values.custom_field_id = students.id');
+        $this->datatables->join('custom_field_values', 'custom_field_values.belong_table_id = students.id');
 
             
         if (!empty($class_section_array)) {
