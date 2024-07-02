@@ -77,6 +77,7 @@ class Generateidcard extends Admin_Controller
 
     public function generatemultiple()
     {
+        
         $studentid           = $this->input->post('data');
         $student_array       = json_decode($studentid);
         $idcard              = $this->input->post('id_card');
@@ -87,15 +88,16 @@ class Generateidcard extends Admin_Controller
         $data['sch_setting'] = $this->setting_model->get();
         $data['id_card']     = $this->Generateidcard_model->getidcardbyid($idcard);
 
+      
         foreach ($student_array as $key => $value) {
             $std_arr[] = $value->student_id;
         }
-
+      
         $students = $this->student_model->getStudentsByArray($std_arr);
         foreach ($students as $key => $students_value) {
             $students[$key]->barcode = $this->customlib->generatebarcode($students_value->admission_no);
         }
-
+  
         $data['students']        = $students;
         $data['sch_settingdata'] = $this->sch_setting_detail;
 
