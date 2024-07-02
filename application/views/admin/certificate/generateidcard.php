@@ -261,7 +261,6 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                     dataType: 'JSON',
                     data: {'data': JSON.stringify(array_to_print), 'class_id': classId, 'id_card': idCard, },
                     success: function (response) {
-                        alert("DFDS");
                         Popup(response.page);
                     },
                     error: function(err){
