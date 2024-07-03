@@ -94,9 +94,9 @@ class Generateidcard extends Admin_Controller
         }
       
         $students = $this->student_model->getStudentsByArray($std_arr);
-        // foreach ($students as $key => $students_value) {
-        //     $students[$key]->barcode = $this->customlib->generatebarcode($students_value->admission_no);
-        // }
+        foreach ($students as $key => $students_value) {
+            $students[$key]->barcode = $this->customlib->generatebarcode($students_value->admission_no);
+        }
   
         $data['students']        = $students;
         $data['sch_settingdata'] = $this->sch_setting_detail;
