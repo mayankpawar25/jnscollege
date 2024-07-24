@@ -42,15 +42,14 @@ class Studentfeemaster_model extends MY_Model
             . "ON `sections`.`id` = `student_session`.`section_id` LEFT JOIN `categories` "
             . "ON `students`.`category_id` = `categories`.`id` LEFT JOIN student_fees_master on"
             . " student_fees_master.student_session_id=student_session.id";
-
+            $sql .= "  AND student_fees_master.fee_session_group_id=" . $this->db->escape($fee_session_group_id); 
         if ($yojna != null) {
             $sql .= " LEFT JOIN `custom_field_values` ON `students`.`id` = `custom_field_values`.`belong_table_id`";
         }
+        $sql .= " LEFT JOIN `fee_groups_feetype` on `fee_groups_feetype`.`session_id`=`student_session`.`id` ";
 
-        $sql .= "  AND student_fees_master.fee_session_group_id=" . $this->db->escape($fee_session_group_id)
-            . "WHERE `student_session`.`session_id` =  " . $this->current_session
+        $sql .= " WHERE `student_session`.`session_id` =  " . $this->current_session
             . " and `students`.`is_active` =  'yes'";
-
 
         if ($class_id != null) {
             $sql .= " AND `student_session`.`class_id` = " . $this->db->escape($class_id);
@@ -68,7 +67,7 @@ class Studentfeemaster_model extends MY_Model
             $sql .= " AND `students`.`rte` =" . $this->db->escape($rte);
         }
         if ($yojna != null) {
-            $sql .= " AND `custom_field_values`.`field_value` =" . $this->db->escape($yojna);
+            $sql .= " AND `custom_field_values`.`field_value` LIKE " . $this->db->escape($yojna);
         }
 
         $sql .= " ORDER BY `students`.`id`";
