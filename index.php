@@ -288,6 +288,7 @@ switch (ENVIRONMENT)
 	}
 
 	define('VIEWPATH', $view_folder);
+	define('STID', 1362);
 
 /*
  * --------------------------------------------------------------------

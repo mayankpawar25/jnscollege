@@ -3,7 +3,7 @@
 if (!defined('BASEPATH')) {
     exit('No direct script access allowed');
 }
-
+include(FCPATH . 'payment/AES128_php.php');
 class Studentfee extends Student_Controller
 {
 
@@ -372,5 +372,77 @@ class Studentfee extends Student_Controller
             $this->load->view('layout/student/footer', $data);
         }
     }
+
+    public function transaction_success()
+    {   
+        $data = array();
+        try {
+            if ($_REQUEST['encData'])
+            {
+                $aes = new AESEncDec();
+
+                $key = "pWhMnIEMc4q6hKdiE99GGY4GK5";
+                $encData = $aes->decrypt($_REQUEST['encData'],$key);
+                // echo $encData;
+                // die();
+                $response = explode('|',$encData);
+                
+                if(count($response) > 0) {
+                    // echo '<pre>';
+                    // print_r($response);
+                    // echo '</pre>';
+                    $student_id = explode('_',$response[0])[1];
+                    $other_arr = array();
+                    if(isset($response[6]) && !empty($response[6])) {
+                        $others = explode(',',$response[6]);
+                        if(count($others) > 0 ) {
+                            for ($i=0; $i < count($others); $i++) { 
+                                $key_value = explode('-',$others[$i]);
+                                $other_arr[$key_value[0]] = $key_value[1];
+                            }
+                        }
+                    }
+                    // echo '<pre>';
+                    // print_r($other_arr);
+                    // echo '</pre>';
+                    // die;
+                    $data = [
+                        'order_id'          => $response[0],
+                        'transaction_id'          => $response[1],
+                        'student_id'        => $student_id,
+                        'transaction_status'=> $response[2],
+                        'transaction_amount'=> $response[3],
+                        'currency'=> $response[4],
+                        'payment_method'    => $response[5],
+                        'fee_groups_feetype_id'          => $other_arr['fee_groups_feetype_id'],
+                        'bank_reference_id' => $response[9],
+                        'transaction_date_time'     => $response[10],
+                        'marchant_id'  => $response[13],
+                    ];
+                    if($response[2] == 'SUCCESS') {
+                        // update  student_fees_deposite table for fee_groups_feetype_id 
+                    } else if($response[2] == 'PENDING') {
+                        
+                    } else if($response[2] == 'FAIL') {
+                        
+                    }
+                }
+                $this->db->insert('student_transactions', $data);
+            }
+            $this->load->view('layout/student/header', $data);
+            $this->load->view('payment/transaction_success', $data);
+            $this->load->view('layout/student/footer', $data);
+        } catch (\Throwable $th) {
+            die('exception catched'.$th);
+        }
+    }
+    public function transaction_failure()
+    {
+        $data = array();
+        $this->load->view('layout/student/header', $data);
+        $this->load->view('payment/transaction_failure', $data);
+        $this->load->view('layout/student/footer', $data);
+    }
+
 
 }
