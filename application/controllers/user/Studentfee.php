@@ -444,5 +444,48 @@ class Studentfee extends Student_Controller
         $this->load->view('layout/student/footer', $data);
     }
 
+    public function doubleVerification()
+	{
+	    //$this->sbiDoubleVerification();
+	    
+	   // Fetch records where transaction_status = 'PENDING'
+        $query = $this->db->get_where('student_transactions', ['transaction_status' => 'PENDING']);
+        $results = $query->result(); // Fetch multiple rows as objects
+
+        // Loop through the records
+        foreach ($results as $row) {
+            echo "Transaction ID: " . $row->id . " - Status: " . $row->transaction_status . "<br>";
+        
+
+            $merchant_order_no=$row->order_id; // merchant order no
+            $merchantid=$row->marchant_id;  //merchant id
+            $amount=$row->transaction_amount; // Transaction posting Amount 
+            $url="https://test.sbiepay.sbi/payagg/statusQuery/getStatusQuery";
+            $queryRequest="|$merchantid|$merchant_order_no|$amount"; 
+
+            $queryRequest33=http_build_query(array('queryRequest' => $queryRequest,'aggregatorId'=>'SBIEPAY','merchantId'=>$merchantid));
+            
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,false); 
+            curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,1);
+            curl_setopt($ch, CURLOPT_SSLVERSION, 6);
+            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+            curl_setopt($ch,CURLOPT_POSTFIELDS, $queryRequest33);
+            $response = curl_exec ($ch);			
+            if (curl_errno($ch)) {
+                echo $error_msg = curl_error($ch);
+            }				
+            curl_close ($ch);
+            echo $response;
+            $response = explode('|',$response);
+                
+            if(count($response) > 0 && $response[2] == 'SUCCESS') {
+                $this->db->where('id', $row->id);
+                $this->db->update('student_transactions', ['transaction_status' => 'SUCCESS']);
+            }
+        }
+	}
+
 
 }
