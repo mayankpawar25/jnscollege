@@ -383,14 +383,9 @@ class Studentfee extends Student_Controller
 
                 $key = "pWhMnIEMc4q6hKdiE99GGY4GK5";
                 $encData = $aes->decrypt($_REQUEST['encData'],$key);
-                // echo $encData;
-                // die();
                 $response = explode('|',$encData);
                 
                 if(count($response) > 0) {
-                    // echo '<pre>';
-                    // print_r($response);
-                    // echo '</pre>';
                     $student_id = explode('_',$response[0])[1];
                     $other_arr = array();
                     if(isset($response[6]) && !empty($response[6])) {
@@ -402,10 +397,6 @@ class Studentfee extends Student_Controller
                             }
                         }
                     }
-                    // echo '<pre>';
-                    // print_r($other_arr);
-                    // echo '</pre>';
-                    // die;
                     $data = [
                         'order_id'          => $response[0],
                         'transaction_id'          => $response[1],
@@ -419,19 +410,43 @@ class Studentfee extends Student_Controller
                         'transaction_date_time'     => $response[10],
                         'marchant_id'  => $response[13],
                     ];
-                    if($response[2] == 'SUCCESS') {
-                        // update  student_fees_deposite table for fee_groups_feetype_id 
-                    } else if($response[2] == 'PENDING') {
-                        
-                    } else if($response[2] == 'FAIL') {
-                        
-                    }
+                    $inserted = $this->db->insert('student_transactions', $data);
+
+                    if ($inserted) {
+                        if($response[2] == 'SUCCESS') {
+                            // update  student_fees_deposite table for fee_groups_feetype_id 
+                            $json_array_amount_detail               = array(
+                                'amount'          => convertCurrencyFormatToBaseAmount($data['transaction_amount']),
+                                'amount_discount' => 0,
+                                'amount_fine'     => 0,
+                                'date'            => date('Y-m-d', strtotime($data['transaction_date_time'])),
+                                'description'     => '',
+                                'collected_by'    => 'system',
+                                'payment_mode'    => $data['payment_method'],
+                                'received_by'     => 'system',
+                                'inv_no'          => 1
+                            );
+                            $data_deposite = array(
+                                'fee_category'           => 'fees',
+                                'student_fees_master_id' => $other_arr['student_fees_master_id'],
+                                'fee_groups_feetype_id'  => $other_arr['fee_groups_feetype_id'],
+                                'amount_detail'          => $json_array_amount_detail,
+                            );
+                            $student_fees_discount_id = null;
+                            $inserted_id        = $this->studentfeemaster_model->fee_deposit($data_deposite, '', $student_fees_discount_id);
+                           
+                        }
+                    } else {
+                        echo "Failed to insert record!";
+                    }                    
+                    $data = array_merge($data, $data_deposite);
+                    // $data['data'] = $data;
+                    $this->load->view('layout/student/header', $data);
+                    $this->load->view('payment/transaction_success', $data);
+                    $this->load->view('layout/student/footer', $data);
                 }
-                $this->db->insert('student_transactions', $data);
+                
             }
-            $this->load->view('layout/student/header', $data);
-            $this->load->view('payment/transaction_success', $data);
-            $this->load->view('layout/student/footer', $data);
         } catch (\Throwable $th) {
             die('exception catched'.$th);
         }
