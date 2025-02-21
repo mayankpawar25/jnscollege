@@ -469,14 +469,15 @@ class Studentfee extends Student_Controller
 
         // Loop through the records
         foreach ($results as $row) {
-            echo "Transaction ID: " . $row->id . " - Status: " . $row->transaction_status . "<br>";
+            // echo "Transaction ID: " . $row->id . " - Status: " . $row->transaction_status . "<br>";
         
 
             $merchant_order_no=$row->order_id; // merchant order no
             $merchantid=$row->marchant_id;  //merchant id
             $amount=$row->transaction_amount; // Transaction posting Amount 
             $url="https://test.sbiepay.sbi/payagg/statusQuery/getStatusQuery";
-            $queryRequest="|$merchantid|$merchant_order_no|$amount"; 
+            $queryRequest="|$merchantid|$merchant_order_no|$amount";
+            echo "queryRequest: " . $queryRequest. "<br>"; 
 
             $queryRequest33=http_build_query(array('queryRequest' => $queryRequest,'aggregatorId'=>'SBIEPAY','merchantId'=>$merchantid));
             
@@ -492,7 +493,7 @@ class Studentfee extends Student_Controller
                 echo $error_msg = curl_error($ch);
             }				
             curl_close ($ch);
-            echo $response;
+            echo "response: " . $response. "<br><br><br><br>";
             $response = explode('|',$response);
                 
             if(count($response) > 0 && $response[2] == 'SUCCESS') {
