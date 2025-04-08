@@ -86,8 +86,8 @@ class Site extends Public_Controller
             $this->load->view('admin/login', $data);
         } else {
             $login_post = array(
-                'email'    => $this->input->post('username'),
-                'password' => $this->input->post('password'),
+                'email'    => $this->input->post('username', TRUE),
+                'password' => $this->input->post('password', TRUE),
             );
             if ($this->captchalib->is_captcha('login')) {
             $data['captcha_image'] = $this->captchalib->generate_captcha()['image'];
@@ -459,8 +459,8 @@ class Site extends Public_Controller
             $this->load->view('userlogin', $data);
         } else {
             $login_post = array(
-                'username' => $this->input->post('username'),
-                'password' => $this->input->post('password'),
+                'username'    => $this->input->post('username', TRUE),
+                'password' => $this->input->post('password', TRUE),
             );
             $data['captcha_image'] = $this->captchalib->generate_captcha()['image'];
             $login_details         = $this->user_model->checkLogin($login_post);
