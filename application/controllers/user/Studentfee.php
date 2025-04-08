@@ -1,8 +1,11 @@
 <?php
 
+use Mpdf\Tag\Q;
+
 if (!defined('BASEPATH')) {
     exit('No direct script access allowed');
 }
+include(FCPATH . 'payment/AES128_php.php');
 
 class Studentfee extends Student_Controller
 {
@@ -372,5 +375,166 @@ class Studentfee extends Student_Controller
             $this->load->view('layout/student/footer', $data);
         }
     }
+    public function transaction_success()
+    {   
+        $data = array();
+        try {
+            if ($_REQUEST['encData'])
+            {
+                $aes = new AESEncDec();
+
+                $key = "pWhMnIEMc4q6hKdiE99GGY4GK5";
+                $encData = $aes->decrypt($_REQUEST['encData'],$key);
+                // echo "Response for success: " . $encData. "<br>";
+                // die;
+                $response = explode('|',$encData);
+                
+                if(count($response) > 0) {
+                    $student_id = explode('_',$response[0])[1];
+                    $other_arr = array();
+                    if(isset($response[6]) && !empty($response[6])) {
+                        $others = explode(',',$response[6]);
+                        if(count($others) > 0 ) {
+                            for ($i=0; $i < count($others); $i++) { 
+                                $key_value = explode('-',$others[$i]);
+                                $other_arr[$key_value[0]] = $key_value[1];
+                            }
+                        }
+                    }
+                    $data = [
+                        'order_id'          => $response[0],
+                        'transaction_id'          => $response[1],
+                        'student_id'        => $student_id,
+                        'transaction_status'=> $response[2],
+                        'transaction_amount'=> $response[3],
+                        'currency'=> $response[4],
+                        'payment_method'    => $response[5],
+                        'fee_groups_feetype_id'          => $other_arr['fee_groups_feetype_id'],
+                        'bank_reference_id' => $response[9],
+                        'transaction_date_time'     => $response[10],
+                        'marchant_id'  => $response[13],
+                    ];
+                    $inserted = $this->db->insert('student_transactions', $data);
+
+                    if ($inserted) {
+                        if($response[2] == 'SUCCESS') {
+                            // update  student_fees_deposite table for fee_groups_feetype_id 
+                            $json_array_amount_detail               = array(
+                                'amount'          => convertCurrencyFormatToBaseAmount($data['transaction_amount']),
+                                'amount_discount' => 0,
+                                'amount_fine'     => 0,
+                                'date'            => date('Y-m-d', strtotime($data['transaction_date_time'])),
+                                'description'     => '',
+                                'collected_by'    => 'system',
+                                'payment_mode'    => $data['payment_method'],
+                                'received_by'     => 'system',
+                                'inv_no'          => 1
+                            );
+                            $data_deposite = array(
+                                'fee_category'           => 'fees',
+                                'student_fees_master_id' => $other_arr['student_fees_master_id'],
+                                'fee_groups_feetype_id'  => $other_arr['fee_groups_feetype_id'],
+                                'amount_detail'          => $json_array_amount_detail,
+                            );
+                            $student_fees_discount_id = null;
+                            // $inserted_id        = $this->studentfeemaster_model->fee_deposit($data_deposite, '', $student_fees_discount_id);
+                           
+                        }
+                    } else {
+                        echo "Failed to insert record!";
+                    }                    
+                    $data = array_merge($data, $data_deposite);
+                    // $data['data'] = $data;
+                    $this->load->view('layout/student/header', $data);
+                    $this->load->view('payment/transaction_success', $data);
+                    $this->load->view('layout/student/footer', $data);
+                }
+                
+            }
+        } catch (\Throwable $th) {
+            die('exception catched'.$th);
+        }
+    }
+    public function transaction_failure()
+    {
+        $aes = new AESEncDec();
+
+                $key = "pWhMnIEMc4q6hKdiE99GGY4GK5";
+        $encData = $aes->decrypt($_REQUEST['encData'],$key);
+                // echo "Response for failure: " . $encData. "<br>";
+                // die;
+        $data = array();
+        $this->load->view('layout/student/header', $data);
+        $this->load->view('payment/transaction_failure', $data);
+        $this->load->view('layout/student/footer', $data);
+    }
+
+    public function doubleVerification()
+	{
+        if(isset($_GET['order_id']) && !empty($_GET['order_id']) && isset($_GET['amount']) && !empty($_GET['amount']) && (float)$_GET['amount'] > 0) {
+            $merchant_order_no=$_GET['order_id'];
+            $merchantid=1000605;
+            $amount=(float)$_GET['amount'];
+            $url="https://test.sbiepay.sbi/payagg/statusQuery/getStatusQuery";
+            $queryRequest="|$merchantid|$merchant_order_no|$amount"; 
+            echo "queryRequest: " . $queryRequest. "<br><br>";
+            $queryRequest33=http_build_query(array('queryRequest' => $queryRequest,'aggregatorId'=>'SBIEPAY','merchantId'=>$merchantid));
+            
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,false); 
+            curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,1);
+            curl_setopt($ch, CURLOPT_SSLVERSION, 6);
+            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+            curl_setopt($ch,CURLOPT_POSTFIELDS, $queryRequest33);
+            $response = curl_exec ($ch);			
+            if (curl_errno($ch)) {
+                echo $error_msg = curl_error($ch);
+            }				
+            curl_close ($ch);
+            echo "response: " . $response. "<br><br><br><br>";
+            $response = explode('|',$response);
+        } else {
+            //$this->sbiDoubleVerification();
+            
+        // Fetch records where transaction_status = 'PENDING'
+            $query = $this->db->get_where('student_transactions', ['transaction_status' => 'PENDING']);
+            $results = $query->result(); // Fetch multiple rows as objects
+
+            // Loop through the records
+            foreach ($results as $row) {
+                echo "Transaction ID: " . $row->id . " - Status: " . $row->transaction_status . "<br>";
+            
+
+                $merchant_order_no=$row->order_id; // merchant order no
+                $merchantid=$row->marchant_id;  //merchant id
+                $amount=$row->transaction_amount; // Transaction posting Amount 
+                $url="https://test.sbiepay.sbi/payagg/statusQuery/getStatusQuery";
+                $queryRequest="|$merchantid|$merchant_order_no|$amount"; 
+                echo "queryRequest: " . $queryRequest. "<br>";
+                $queryRequest33=http_build_query(array('queryRequest' => $queryRequest,'aggregatorId'=>'SBIEPAY','merchantId'=>$merchantid));
+                
+                $ch = curl_init($url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,false); 
+                curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,1);
+                curl_setopt($ch, CURLOPT_SSLVERSION, 6);
+                curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+                curl_setopt($ch,CURLOPT_POSTFIELDS, $queryRequest33);
+                $response = curl_exec ($ch);			
+                if (curl_errno($ch)) {
+                    echo $error_msg = curl_error($ch);
+                }				
+                curl_close ($ch);
+                echo "response: " . $response. "<br><br><br><br>";
+                $response = explode('|',$response);
+                    
+                if(count($response) > 0 && $response[2] == 'SUCCESS') {
+                    $this->db->where('id', $row->id);
+                    $this->db->update('student_transactions', ['transaction_status' => 'SUCCESS']);
+                }
+            }
+        }
+	}
 
 }
