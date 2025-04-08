@@ -61,7 +61,7 @@
                                             $this->session->unset_userdata('disable_message'); 
                                         };
                                         ?>
-                                        <form action="<?php echo site_url('site/login') ?>" method="post">
+                                        <form action="<?php echo site_url('site/login') ?>" method="post" autocomplete="off">
                                             <?php echo $this->customlib->getCSRF(); ?>
                                             <div class="form-group has-feedback">                                            
                                                 <input type="text" name="username" placeholder="<?php echo $this->lang->line('username'); ?>" value="<?php echo set_value('username') ?>" class="form-username form-control" id="form-username">
@@ -69,7 +69,7 @@
                                                 <span class="text-danger"><?php echo form_error('username'); ?></span>
                                             </div>
                                             <div class="form-group has-feedback">                      
-                                                <input type="password" value="<?php echo set_value('password') ?>" name="password" placeholder="<?php echo $this->lang->line('password'); ?>" class="form-password form-control" id="form-password">
+                                                <input type="password" value="<?php echo set_value('password') ?>" name="password" placeholder="<?php echo $this->lang->line('password'); ?>" class="form-password form-control" autocomplete="off" id="form-password" >
                                                 <span class="fa fa-lock form-control-feedback"></span>
                                                 <span class="text-danger"><?php echo form_error('password'); ?></span>
                                             </div>

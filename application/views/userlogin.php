@@ -57,7 +57,7 @@ if ($this->session->flashdata('message')) {
 }
 ;
 ?>
-                                        <form action="<?php echo site_url('site/userlogin') ?>" method="post">
+                                        <form action="<?php echo site_url('site/userlogin') ?>" method="post" autocomplete="off">
                                             <?php echo $this->customlib->getCSRF(); ?>
                                             <div class="form-group has-feedback">
                                                 <label class="sr-only" for="form-username">
@@ -67,7 +67,7 @@ if ($this->session->flashdata('message')) {
                                                 <span class="text-danger"><?php echo form_error('username'); ?></span>
                                             </div>
                                             <div class="form-group has-feedback">
-                                                <input type="password" name="password" value="<?php echo set_value("password"); ?>" placeholder="<?php echo $this->lang->line('password'); ?>" class="form-password form-control" id="password">
+                                                <input type="password" name="password" value="<?php echo set_value("password"); ?>" placeholder="<?php echo $this->lang->line('password'); ?>" class="form-password form-control" id="password" autocomplete="off">
                                                 <span class="fa fa-lock form-control-feedback"></span>
                                                 <span class="text-danger"><?php echo form_error('password'); ?></span>
                                             </div>
