@@ -149,7 +149,7 @@ class Site extends Public_Controller
                                                      'db_group'=>'default'],
                         'superadmin_restriction' => $setting_result[0]['superadmin_restriction'],
                     );
-
+                    $this->session->sess_regenerate(TRUE);
                     $this->session->set_userdata('admin', $session_data);
 
                     $role      = $this->customlib->getStaffRole();
@@ -547,7 +547,7 @@ class Site extends Public_Controller
                             'superadmin_restriction' => $setting_result[0]['superadmin_restriction'],
 
                         );
-
+                        $this->session->sess_regenerate(TRUE);
                         $this->session->set_userdata('student', $session_data);
                         if ($result[0]->role == "parent") {
                             $this->customlib->setUserLog($result[0]->username, $result[0]->role);
