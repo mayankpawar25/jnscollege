@@ -18,9 +18,9 @@ $hook['pre_system'][] = array(
     'filename' => 'maintenance_hook.php',
     'filepath' => 'hooks'
 );
-$hook['post_controller_constructor'][] = array(
-    'class'    => 'CspHeaderHook',
-    'function' => 'addCspHeader',
-    'filename' => 'CspHeaderHook.php',
-    'filepath' => 'hooks'
-);
+// $hook['post_controller_constructor'][] = array(
+//     'class'    => 'CspHeaderHook',
+//     'function' => 'addCspHeader',
+//     'filename' => 'CspHeaderHook.php',
+//     'filepath' => 'hooks'
+// );
