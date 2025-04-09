@@ -352,7 +352,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                                                     </form>
                                                             <?php
 
-                                                            } else if(STID == 1477){ 
+                                                            } else if(true){ 
                                                                 $orderid = uniqid();
                                                                 $student_id = $student['id'];
                                                                 $orderid .= '_'.$student_id;
@@ -362,25 +362,20 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                                                 
                                                                 $fee_groups_feetype_id = $fee_value->fee_groups_feetype_id;
                                                                 $student_fees_master_id = $fee->id;
-                                                                // $balance = 20;
-                                                                // $other = array('fee_groups_feetype_id'=>$fee_groups_feetype_id,'student_fees_master_id'=>$student_fees_master_id);
                                                                 $other = 'fee_groups_feetype_id-'.$fee_groups_feetype_id.',student_fees_master_id-'.$student_fees_master_id;
                                                                 $key = "pWhMnIEMc4q6hKdi2Fx50Ii8CKAoSIqv9ScSpwuMHM4=";
-                                                                // $requestParameter  = "1000605|DOM|IN|INR|10|Other|http://localhost/jns/user/studentfee/transaction_success|http://localhost/jns/user/studentfee/transaction_failure|SBIEPAY|$orderid|2|NB|ONLINE|ONLINE";
-                                                                // $requestParameter  = "1000605|DOM|IN|INR|10|Other|https://jnscollege.com/payment/transaction_success.php|https://jnscollege.com/payment/transaction_failure.php|SBIEPAY|$orderid|2|NB|ONLINE|ONLINE";
                                                                 $requestParameter  = "1000605|DOM|IN|INR|$balance|$other|$successPage|$failedPage|SBIEPAY|$orderid|$student_id|NB|ONLINE|ONLINE";
                                                                 // MerchantID|DOMESTIC|IN|INR|Amount|Payment Purpose|successpage URL|Fail page URL|Aggregrator ID (Same as above)|Unique Order ID for each transactions|Customer Id|Paymode - Debit card, credit card|Access Medium|Transaction source
                                                                 $aes = new AESEncDec();
                                                                 $EncryptTrans = $aes->encrypt($requestParameter, $key);
-                                                                // echo "queryRequest for success: " . $requestParameter. "<br>";
                                                                 ?>
-                                                                <form name="eco" class="form_fees1" action="https://test.sbiepay.sbi/secure/AggregatorHostedListener" method="POST">
+                                                                <form name="eco" class="form_fees1" action="https://test.sbiepay.sbi/secure/AggregatorHostedListener" method="POST" autocomplete="off">
                                                                     <input type="hidden" name="EncryptTrans" value="<?php echo $EncryptTrans; ?>">
                                                                     <input type="hidden" name="merchIdVal" value="1000605" />
                                                                     <input type="hidden" name="balance" value="<?php echo $balance;?>" />
                                                                     <input type="hidden" name="student_id" value="<?php echo $student_id;?>" />
                                                                     <button class="btn btn-xs btn-primary" type="submit">
-                                                                        <i class="fa fa-money"></i> <?php echo $this->lang->line('pay'); ?></button>
+                                                                        <i class="fa fa-money" title="SBI pay"></i> <?php echo $this->lang->line('pay'); ?></button>
                                                                 </form>
                                                             <?php }
                                                             }
