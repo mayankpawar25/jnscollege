@@ -584,7 +584,7 @@ class Admin extends Admin_Controller
         $this->session->set_userdata('sub_menu', 'changepass/index');
         $data['title'] = 'Change Password';
         $this->form_validation->set_rules('current_pass', $this->lang->line("current_password"), 'trim|required|xss_clean');
-        $this->form_validation->set_rules('new_pass', $this->lang->line("new_password"), 'trim|required|xss_clean|matches[confirm_pass]');
+        $this->form_validation->set_rules('new_pass', $this->lang->line("new_password"), 'trim|required|xss_clean|matches[confirm_pass]|callback_valid_password');
         $this->form_validation->set_rules('confirm_pass', $this->lang->line("confirm_password"), 'trim|required|xss_clean');
         if ($this->form_validation->run() == false) {
             $sessionData            = $this->session->userdata('admin');
@@ -635,6 +635,33 @@ class Admin extends Admin_Controller
             }
         }
     }
+
+    public function valid_password($password)
+    {
+        $password = trim($password);
+        if (strlen($password) < 8) {
+            $this->form_validation->set_message('valid_password', 'Password must be at least 8 characters long.');
+            return false;
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            $this->form_validation->set_message('valid_password', 'Password must include at least one uppercase letter.');
+            return false;
+        }
+        if (!preg_match('/[a-z]/', $password)) {
+            $this->form_validation->set_message('valid_password', 'Password must include at least one lowercase letter.');
+            return false;
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            $this->form_validation->set_message('valid_password', 'Password must include at least one number.');
+            return false;
+        }
+        if (!preg_match('/[@$!%*?&]/', $password)) {
+            $this->form_validation->set_message('valid_password', 'Password must include at least one special character: @$!%*?&');
+            return false;
+        }
+        return true;
+    }
+
 
     public function pdf_report()
     {
