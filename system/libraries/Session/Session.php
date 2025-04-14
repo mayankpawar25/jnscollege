@@ -295,7 +295,6 @@ class CI_Session {
 			$params['cookie_domain'],
 			$params['cookie_secure'],
 			TRUE, // HttpOnly; Yes, this is intentional and not configurable for security reasons
-			['samesite' => 'Strict']
 		);
 
 		if (empty($expiration))

@@ -35,6 +35,8 @@
  * @since	Version 1.0.0
  * @filesource
  */
+// Set the Content-Security-Policy header
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'https://trusted-cdn.com'; style-src 'self' 'https://trusted-cdn.com'; img-src 'self'; font-src 'self';");
 
 /*
  *---------------------------------------------------------------
@@ -53,6 +55,7 @@
  *
  * NOTE: If you change these, also change the error_reporting() code below
  */
+
  
 	define('ENVIRONMENT', 'production');
 	
