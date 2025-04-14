@@ -134,7 +134,16 @@ class User
         //about using the user agent: It's easy to fake it, but it increases the barrier for stealing and reusing cookies nevertheless
         // and it doesn't do any harm (except that it's invalid after a browser upgrade, but that may be even intented)
         $cookie = $time.':'.hash_hmac('sha1', $this->getUsername().':'.$time.':'.$_SERVER['HTTP_USER_AGENT'], $this->getSecret());
-        setcookie('otp', $cookie, time() + (30 * 24 * 3600), null, null, null, true,['samesite' => 'Strict']);
+        // setcookie('otp', $cookie, time() + (30 * 24 * 3600), null, null, null, true);
+        $option = [
+			'expires' => time() + (30 * 24 * 3600),
+			'path' => '',
+			'domain'   => '',  
+			'secure' => true,
+			'httponly' => true,
+			'samesite' => 'Strict',
+		];
+		setcookie('otp', $cookie, $option);
     }
 
     public function hasValidOTPCookie()

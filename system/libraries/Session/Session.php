@@ -160,16 +160,25 @@ class CI_Session {
 		// unless it is being currently created or regenerated
 		elseif (isset($_COOKIE[$this->_config['cookie_name']]) && $_COOKIE[$this->_config['cookie_name']] === session_id())
 		{
-			setcookie(
-				$this->_config['cookie_name'],
-				session_id(),
-				(empty($this->_config['cookie_lifetime']) ? 0 : time() + $this->_config['cookie_lifetime']),
-				$this->_config['cookie_path'],
-				$this->_config['cookie_domain'],
-				$this->_config['cookie_secure'],
-				TRUE,
-				['samesite' => 'Strict']
-			);
+			// setcookie(
+			// 	$this->_config['cookie_name'],
+			// 	session_id(),
+			// 	(empty($this->_config['cookie_lifetime']) ? 0 : time() + $this->_config['cookie_lifetime']),
+			// 	$this->_config['cookie_path'],
+			// 	$this->_config['cookie_domain'],
+			// 	$this->_config['cookie_secure'],
+			// 	TRUE
+			// );
+
+			$option = [
+				'expires' => (empty($this->_config['cookie_lifetime']) ? 0 : time() + $this->_config['cookie_lifetime']),
+				'path' => _config['cookie_path'],
+				'domain'   => _config['cookie_domain'],
+				'secure' => _config['cookie_secure'],
+				'httponly' => true,
+				'samesite' => 'Strict',
+			];
+			setcookie($this->_config['cookie_name'], session_id(), $option);
 		}
 
 		$this->_ci_init_vars();
@@ -294,7 +303,7 @@ class CI_Session {
 			$params['cookie_path'],
 			$params['cookie_domain'],
 			$params['cookie_secure'],
-			TRUE, // HttpOnly; Yes, this is intentional and not configurable for security reasons
+			TRUE // HttpOnly; Yes, this is intentional and not configurable for security reasons
 		);
 
 		if (empty($expiration))

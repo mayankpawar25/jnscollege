@@ -129,8 +129,7 @@ abstract class CI_Session_driver implements SessionHandlerInterface {
 			$this->_config['cookie_path'],
 			$this->_config['cookie_domain'],
 			$this->_config['cookie_secure'],
-			TRUE,
-			['samesite' => 'Strict']
+			TRUE
 		);
 	}
 

@@ -1183,7 +1183,16 @@ class Welcome extends Front_Controller
     {
         $cookie_name  = "sitecookies";
         $cookie_value = "1";
-        setcookie($cookie_name, $cookie_value, time() + (86400 * 30), "/", null, null, null, true,['samesite' => 'Strict']);
+        // setcookie($cookie_name, $cookie_value, time() + (86400 * 30), "/");
+        $option = [
+			'expires' => time() + (86400 * 30),
+			'path' => '',
+			'domain'   => '',  
+			'secure' => true,
+			'httponly' => true,
+			'samesite' => 'Strict',
+		];
+		setcookie($cookie_name, $cookie_value, $option);
     }
 
     public function checkadmissionstatus()
