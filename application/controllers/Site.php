@@ -45,7 +45,6 @@ class Site extends Public_Controller
 
     public function login()
     {
-
         $app_name = $this->setting_model->get();
         $app_name = $app_name[0]['name'];
 
@@ -77,6 +76,24 @@ class Site extends Public_Controller
                 $this->form_validation->set_rules('captcha', $this->lang->line('captcha'), 'trim|required');
             }
         }
+        $last_failed_time = (int) get_cookie('last_failed_time');
+        if (time() - $last_failed_time > 30) { // 60 minutes = 3600 seconds
+            $this->reset_failed_attempts();
+        }
+        if ($this->is_locked_out()) {
+            $data['name']          = $app_name;
+            $data['error_message'] = 'Your account is locked due to multiple failed login attempts. Try again after 60 minutes.';
+            $this->load->view('admin/login', $data);
+            return;
+        }
+        // echo time();
+        // echo "<br>";
+        // echo $last_failed_time;
+        // echo "<br>";
+        // echo time() - $last_failed_time;
+        // echo "<br>";
+        // die($this->is_locked_out());
+
         $this->form_validation->set_rules('username', $this->lang->line('username'), 'trim|required|xss_clean');
         $this->form_validation->set_rules('password', $this->lang->line('password'), 'trim|required|xss_clean');
         if ($this->form_validation->run() == false) {
@@ -85,6 +102,9 @@ class Site extends Public_Controller
             $data['name']          = $app_name;
             $this->load->view('admin/login', $data);
         } else {
+            
+            // echo $this->is_locked_out();
+            // die("test");
             $login_post = array(
                 'email'    => $this->input->post('username', TRUE),
                 'password' => $this->input->post('password', TRUE),
@@ -95,7 +115,6 @@ class Site extends Public_Controller
             $setting_result        = $this->setting_model->get();
 
             $result                = $this->staff_model->checkLogin($login_post);
-           
            
             if (!empty($result->language_id)) {
                 $lang_array = array('lang_id' => $result->language_id, 'language' => $result->language);
@@ -115,6 +134,7 @@ class Site extends Public_Controller
             }
 
             if ($result) {
+                $this->reset_failed_attempts();
                 if ($result->is_active) {
                     if ($result->surname != "") {
                         $logusername = $result->name . " " . $result->surname;
@@ -149,6 +169,7 @@ class Site extends Public_Controller
                                                      'db_group'=>'default'],
                         'superadmin_restriction' => $setting_result[0]['superadmin_restriction'],
                     );
+
                     $this->session->sess_regenerate(TRUE);
                     $this->session->set_userdata('admin', $session_data);
 
@@ -169,12 +190,69 @@ class Site extends Public_Controller
                     $this->load->view('admin/login', $data);
                 }
             } else {
+                $this->increment_failed_attempts();
                 $data['name']          = $app_name;
                 $data['error_message'] = $this->lang->line('invalid_username_or_password');
                 $this->load->view('admin/login', $data);
             }
         }
     }
+
+    private function increment_failed_attempts($attempt_cookie = 'failed_attempts', $time_cookie = 'last_failed_time', $lock_cookie = 'locked') {
+        $failed_attempts   = (int) get_cookie($attempt_cookie);
+        $last_failed_time  = (int) get_cookie($time_cookie);
+    
+        $failed_attempts++;
+        
+        set_cookie([
+            'name'     => $attempt_cookie,
+            'value'    => $failed_attempts,
+            'expire'   => 3600,
+            'path'     => '/',
+            'secure'   => TRUE,
+            'httponly' => TRUE,
+        ]);
+
+        // Set last failed time cookie
+        set_cookie([
+            'name'     => $time_cookie,
+            'value'    => time(),
+            'expire'   => 3600,
+            'path'     => '/',
+            'secure'   => TRUE,
+            'httponly' => TRUE,
+        ]);
+
+    
+        // Lock the account if threshold is met
+        if ($failed_attempts >= 3) {
+            $this->lock_account($lock_cookie);
+        }
+    }
+    
+
+    private function lock_account($lock_cookie = 'locked') {
+    set_cookie([
+        'name'   => $lock_cookie,
+        'value'  => '1',
+        'expire' => 3600, // 1 hour lock
+        'secure' => TRUE,
+        'httponly' => TRUE,
+        'samesite' => 'Strict',
+    ]);
+}
+
+
+private function is_locked_out($lock_cookie = 'locked') {
+    return get_cookie($lock_cookie) === '1';
+}
+
+private function reset_failed_attempts($attempt_cookie = 'failed_attempts', $time_cookie = 'last_failed_time', $lock_cookie = 'locked') {
+    delete_cookie($attempt_cookie);
+    delete_cookie($time_cookie);
+    delete_cookie($lock_cookie);
+}
+
 
     public function logout()
     {
@@ -458,6 +536,18 @@ class Site extends Public_Controller
             }
             $this->load->view('userlogin', $data);
         } else {
+            // echo $this->is_locked_out();
+            $last_failed_time = (int) get_cookie('userlogin_last_failed_time');
+            if (time() - $last_failed_time > 30) { // 60 minutes = 3600 seconds
+                $this->reset_failed_attempts('userlogin_failed_attempts', 'userlogin_last_failed_time', 'userlogin_locked');
+            }
+            if ($this->is_locked_out('userlogin_locked')) {
+                $data['error_message'] = 'Your account is locked due to multiple failed login attempts. Try again after 60 minutes.';
+                $this->load->view('userlogin', $data);
+                return;
+            }
+
+
             $login_post = array(
                 'username'    => $this->input->post('username', TRUE),
                 'password' => $this->input->post('password', TRUE),
@@ -486,6 +576,7 @@ class Site extends Public_Controller
 
 
                     if ($result != false) {
+                        $this->reset_failed_attempts('userlogin_failed_attempts', 'userlogin_last_failed_time', 'userlogin_locked');
                         $setting_result = $this->setting_model->get();
                         if ($result[0]->lang_id == 0) {
                             $language = array('lang_id' => $setting_result[0]['lang_id'], 'language' => $setting_result[0]['language']);
@@ -562,6 +653,7 @@ class Site extends Public_Controller
                     $this->load->view('userlogin', $data);
                 }
             } else {
+                $this->increment_failed_attempts('userlogin_failed_attempts', 'userlogin_last_failed_time','userlogin_locked');
                 $data['error_message'] = $this->lang->line('invalid_username_or_password');
                 $this->load->view('userlogin', $data);
             }
