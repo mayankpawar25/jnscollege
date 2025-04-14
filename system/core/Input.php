@@ -404,8 +404,16 @@ class CI_Input {
 		{
 			$expire = ($expire > 0) ? time() + $expire : 0;
 		}
-
-		setcookie($prefix.$name, $value, $expire, $path, $domain, $secure, $httponly,['samesite' => 'Strict']);
+		// setcookie($prefix.$name, $value, $expire, $path, $domain, $secure, $httponly);
+		$option = [
+			'expires' => $expire,
+			'path' => $path,
+			'domain'   => $domain,  
+			'secure' => true,
+			'httponly' => true,
+			'samesite' => 'Strict',
+		];
+		setcookie($prefix.$name, $value, $option);
 	}
 
 	// --------------------------------------------------------------------
