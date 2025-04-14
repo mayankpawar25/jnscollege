@@ -167,7 +167,8 @@ class CI_Session {
 				$this->_config['cookie_path'],
 				$this->_config['cookie_domain'],
 				$this->_config['cookie_secure'],
-				TRUE
+				TRUE,
+				['samesite' => 'Strict']
 			);
 		}
 
@@ -293,7 +294,8 @@ class CI_Session {
 			$params['cookie_path'],
 			$params['cookie_domain'],
 			$params['cookie_secure'],
-			TRUE // HttpOnly; Yes, this is intentional and not configurable for security reasons
+			TRUE, // HttpOnly; Yes, this is intentional and not configurable for security reasons
+			['samesite' => 'Strict']
 		);
 
 		if (empty($expiration))
