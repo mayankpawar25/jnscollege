@@ -142,6 +142,9 @@ class Site extends Public_Controller
                         $logusername = $result->name;
                     }
 
+                    $session_token = bin2hex(random_bytes(32)); // PHP 7+ secure token
+                    // Save the token to DB
+                    // $this->db->where('id', $result->id)->update('staff', ['session_token' => $session_token]);
 
                     $session_data = array(
                         'id'                     => $result->id,
@@ -168,11 +171,16 @@ class Site extends Public_Controller
                                                      'folder_path'            => $setting_result[0]['folder_path'],
                                                      'db_group'=>'default'],
                         'superadmin_restriction' => $setting_result[0]['superadmin_restriction'],
+                        'session_token' => $session_token,
                     );
-
+                    
                     $this->session->sess_regenerate(TRUE);
                     $this->session->set_userdata('admin', $session_data);
-
+                    if(!$this->check_staff_session_token($session_token)) { 
+                        $data['error_message'] = 'You are already logged in on another device.';
+                        $this->load->view('admin/login', $data);
+                        return;
+                    }
                     $role      = $this->customlib->getStaffRole();
                     $role_name = json_decode($role)->name;
                     $this->customlib->setUserLog($this->input->post('username'), $role_name);
@@ -196,6 +204,43 @@ class Site extends Public_Controller
                 $this->load->view('admin/login', $data);
             }
         }
+    }
+
+    protected function check_staff_session_token($session_token) {
+        $admin = $this->session->get_userdata('admin');
+        if ($admin) {
+            $this->load->database();
+            $id = $admin['admin']['id'];
+            $session_token = $admin['admin']['session_token'];
+            $user = $this->db->where('id', $id)->get('staff')->row();
+            if ($user && $user->session_token) {
+                $this->session->sess_destroy();
+                return false;
+            } else {
+                $this->db->where('id', $id)->update('staff', ['session_token' => $session_token]);
+            }
+        } else {
+            
+        }
+        return true;
+    }
+
+    protected function check_user_session_token($session_token) {
+        $student = $this->session->get_userdata('student');
+        if ($student) {
+            $this->load->database();
+            $id = $student['student']['id'];
+            $user = $this->db->where('id', $id)->get('users')->row();
+            if ($user && $user->session_token) {
+                $this->session->sess_destroy();
+                return false;
+            } else {
+                $this->db->where('id', $id)->update('users', ['session_token' => $session_token]);
+            }
+        } else {
+            
+        }
+        return true;
     }
 
     private function increment_failed_attempts($attempt_cookie = 'failed_attempts', $time_cookie = 'last_failed_time', $lock_cookie = 'locked') {
@@ -260,8 +305,12 @@ private function reset_failed_attempts($attempt_cookie = 'failed_attempts', $tim
         $student_session = $this->session->userdata('student');
         $this->auth->logout();
         if ($admin_session) {
+            $staff_id = $admin_session['id'];
+            $this->db->where('id', $staff_id)->update('staff', ['session_token' => NULL]);
             redirect('site/login');
         } else if ($student_session) {
+            $user_id = $student_session['id'];
+            $this->db->where('id', $user_id)->update('users', ['session_token' => NULL]);
             redirect('site/userlogin');
         } else {
             redirect('site/userlogin');
@@ -610,7 +659,7 @@ private function reset_failed_attempts($attempt_cookie = 'failed_attempts', $tim
                             $this->customlib->setUserLog($result[0]->username, $result[0]->role, $defaultclass['id']);
                         }
                         
-                     
+                        $session_token = bin2hex(random_bytes(32)); // PHP 7+ secure token
                         $session_data = array(
                             'id'                     => $result[0]->id,
                             'login_username'         => $result[0]->username,
@@ -636,10 +685,16 @@ private function reset_failed_attempts($attempt_cookie = 'failed_attempts', $tim
                             'image'                  => $image,
                             'gender'                 => $result[0]->gender,
                             'superadmin_restriction' => $setting_result[0]['superadmin_restriction'],
-
+                            'session_token' => $session_token,
                         );
                         $this->session->sess_regenerate(TRUE);
                         $this->session->set_userdata('student', $session_data);
+
+                        if(!$this->check_user_session_token($session_token)) { 
+                            $data['error_message'] = 'You are already logged in on another device.';
+                            $this->load->view('userlogin', $data);
+                            return;
+                        }
                         if ($result[0]->role == "parent") {
                             $this->customlib->setUserLog($result[0]->username, $result[0]->role);
                         }
