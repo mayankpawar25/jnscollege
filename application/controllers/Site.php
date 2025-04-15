@@ -94,8 +94,8 @@ class Site extends Public_Controller
         // echo "<br>";
         // die($this->is_locked_out());
 
-        $this->form_validation->set_rules('username', $this->lang->line('username'), 'trim|required|xss_clean');
-        $this->form_validation->set_rules('password', $this->lang->line('password'), 'trim|required|xss_clean');
+        $this->form_validation->set_rules('username', $this->lang->line('username'), 'trim|required|xss_clean|max_length[50]');
+        $this->form_validation->set_rules('password', $this->lang->line('password'), 'trim|required|xss_clean|max_length[50]');
         if ($this->form_validation->run() == false) {
             $captcha               = $this->captchalib->generate_captcha();
             $data['captcha_image'] = isset($captcha['image']) ? $captcha['image'] : "";
@@ -528,8 +528,8 @@ private function reset_failed_attempts($attempt_cookie = 'failed_attempts', $tim
             }  
             
         }
-        $this->form_validation->set_rules('username', $this->lang->line('username'), 'trim|required|xss_clean');
-        $this->form_validation->set_rules('password', $this->lang->line('password'), 'trim|required|xss_clean');
+        $this->form_validation->set_rules('username', $this->lang->line('username'), 'trim|required|xss_clean|max_length[50]');
+        $this->form_validation->set_rules('password', $this->lang->line('password'), 'trim|required|xss_clean|max_length[50]');
         if ($this->form_validation->run() == false) {
             if ($this->captchalib->is_captcha('userlogin')) {
                 $data['captcha_image'] = $this->captchalib->generate_captcha()['image'];
