@@ -36,7 +36,8 @@
  * @filesource
  */
 // Set the Content-Security-Policy header
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'https://trusted-cdn.com'; style-src 'self' 'https://trusted-cdn.com'; img-src 'self'; font-src 'self';");
+// header("Content-Security-Policy: default-src 'self'; script-src 'self' 'https://trusted-cdn.com'; style-src 'self' 'https://trusted-cdn.com'; img-src 'self'; font-src 'self';");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' 'https://cdnjs.cloudflare.com' 'https://cdn.jsdelivr.net' 'http://code.jquery.com'; style-src 'self' 'https://cdnjs.cloudflare.com' 'https://cdn.jsdelivr.net'; img-src 'self' 'https://cdnjs.cloudflare.com' 'https://cdn.jsdelivr.net' data:; font-src 'self'; frame-ancestors 'none';");
 
 /*
  *---------------------------------------------------------------
