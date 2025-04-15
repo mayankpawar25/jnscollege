@@ -587,7 +587,7 @@ private function reset_failed_attempts($attempt_cookie = 'failed_attempts', $tim
         } else {
             // echo $this->is_locked_out();
             $last_failed_time = (int) get_cookie('userlogin_last_failed_time');
-            if (time() - $last_failed_time > 30) { // 60 minutes = 3600 seconds
+            if (time() - $last_failed_time > 3600) { // 60 minutes = 3600 seconds
                 $this->reset_failed_attempts('userlogin_failed_attempts', 'userlogin_last_failed_time', 'userlogin_locked');
             }
             if ($this->is_locked_out('userlogin_locked')) {
