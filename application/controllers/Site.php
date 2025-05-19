@@ -176,11 +176,11 @@ class Site extends Public_Controller
                     
                     $this->session->sess_regenerate(TRUE);
                     $this->session->set_userdata('admin', $session_data);
-                    if(!$this->check_staff_session_token($session_token)) { 
-                        $data['error_message'] = 'You are already logged in on another device.';
-                        $this->load->view('admin/login', $data);
-                        return;
-                    }
+                    // if(!$this->check_staff_session_token($session_token)) { 
+                    //     $data['error_message'] = 'You are already logged in on another device.';
+                    //     $this->load->view('admin/login', $data);
+                    //     return;
+                    // }
                     $role      = $this->customlib->getStaffRole();
                     $role_name = json_decode($role)->name;
                     $this->customlib->setUserLog($this->input->post('username'), $role_name);
@@ -690,11 +690,11 @@ private function reset_failed_attempts($attempt_cookie = 'failed_attempts', $tim
                         $this->session->sess_regenerate(TRUE);
                         $this->session->set_userdata('student', $session_data);
 
-                        if(!$this->check_user_session_token($session_token)) { 
-                            $data['error_message'] = 'You are already logged in on another device.';
-                            $this->load->view('userlogin', $data);
-                            return;
-                        }
+                        // if(!$this->check_user_session_token($session_token)) { 
+                        //     $data['error_message'] = 'You are already logged in on another device.';
+                        //     $this->load->view('userlogin', $data);
+                        //     return;
+                        // }
                         if ($result[0]->role == "parent") {
                             $this->customlib->setUserLog($result[0]->username, $result[0]->role);
                         }
