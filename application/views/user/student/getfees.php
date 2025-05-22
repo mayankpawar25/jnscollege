@@ -722,10 +722,10 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                             <?php } ?>
 
                         </div>
-                        <div class="col-md-12">
+                        <!-- <div class="col-md-12">
                                 <div style="background: #dadada; height: 1px; width: 100%; clear: both; margin-bottom: 10px;"></div>
-                        </div>
-                        <div class="qr-scan" style="text-align: center;">
+                        </div> -->
+                        <div class="qr-scan" style="text-align: center; display:none;">
                         <img  src="<?php  echo base_url() . "uploads/student_images/qrcode.png".img_time(); ?>" alt="qr-code" width="400"/>
                         </div>
                     </div>
