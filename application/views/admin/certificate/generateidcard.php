@@ -299,7 +299,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
         document.getElementById('printDiv').contentWindow.focus();
         document.getElementById('printDiv').contentWindow.print();
             frame1.remove();
-        }, 500);
+        }, 1000);
 
         return true;
     }

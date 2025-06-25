@@ -120,13 +120,15 @@
     </li>
 </ul>
 <script>
-    $('.verticalmenu').click(function(event) {
-        event.stopPropagation();
-    });
+    $(document).ready(function () {
+        $('.verticalmenu').click(function(event) {
+            event.stopPropagation();
+        });
 
-    $(".mCustomScrollbar").mCustomScrollbar({
-        scrollInertia: 1000,
-        mouseWheelPixels: 170,
-        autoDraggerLength: false,
+        $(".mCustomScrollbar").mCustomScrollbar({
+            scrollInertia: 1000,
+            mouseWheelPixels: 170,
+            autoDraggerLength: false,
+        });
     });
 </script>
