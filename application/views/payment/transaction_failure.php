@@ -84,11 +84,12 @@
                                 </svg>
                             </div>
                             <h2>Payment Failed!</h2>
-                            <div class="hr"></div>
-                            <h5><b>You order id : <?php echo $order_id;?></b></h5>
-                            <h4>Please contact your accounts department with reference to this order ID.</h4>
-                            <div class="hr"></div>
-                            <div style="margin-top:10px;">Please <a href="<?php echo base_url().'user/user/getfees'; ?>" style="display:inline;">click here</a> to go to the fees page.</div>
+    <div class="hr"></div>
+    <h5><b>You order id: <?php echo $order_id;?></b></h5>
+    <h5><b>Reason: <?php echo $failure_reason;?></b></h5>
+    <h6>For assistance, please reach out to your accounts department and reference this Order ID.</h6>
+    <div class="hr"></div>
+    <div style="margin-top:10px;"><a class="btn btn-sm btn-success" href="<?php echo base_url().'user/user/getfees'; ?>" style="display:inline;">Click here</a> to go to the fees page.</div>
                         </div>
                     </div>
                 </div>

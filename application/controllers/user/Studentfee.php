@@ -392,14 +392,12 @@ class Studentfee extends Student_Controller
                 
                 if(count($response) > 0) {
                     $student_id = explode('_',$response[0])[1];
-                    $other_arr = array();
+                    $other_arr = array('fee_groups_feetype_id' => 0, 'student_fees_master_id' => 0);
                     if(isset($response[6]) && !empty($response[6])) {
-                        $others = explode(',',$response[6]);
+                        $others = explode('^',$response[6]);
                         if(count($others) > 0 ) {
-                            for ($i=0; $i < count($others); $i++) { 
-                                $key_value = explode('^',$others[$i]);
-                                $other_arr[$key_value[0]] = $key_value[1];
-                            }
+                            $other_arr['fee_groups_feetype_id'] = $others[2];
+                            $other_arr['student_fees_master_id'] = $others[3];
                         }
                     }
                     $data = [
@@ -476,7 +474,7 @@ class Studentfee extends Student_Controller
         $this->load->view('layout/student/header', $data);
         $this->load->view('payment/transaction_failure', $data);
         $this->load->view('layout/student/footer', $data);
-    }
+    }   
 
     public function doubleVerification()
 	{
