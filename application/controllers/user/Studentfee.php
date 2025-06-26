@@ -376,14 +376,15 @@ class Studentfee extends Student_Controller
         }
     }
     public function transaction_success()
-    {   
+    {
         $data = array();
         try {
             if ($_REQUEST['encData'])
             {
                 $aes = new AESEncDec();
 
-                $key = "pWhMnIEMc4q6hKdiE99GGY4GK5";
+                // $key = "pWhMnIEMc4q6hKdiE99GGY4GK5";
+                $key = "/7WeUC15cruhrad/TYReUgNJAUEtujE43WRDN00oCRA=";
                 $encData = $aes->decrypt($_REQUEST['encData'],$key);
                 // echo "Response for success: " . $encData. "<br>";
                 // die;
@@ -396,7 +397,7 @@ class Studentfee extends Student_Controller
                         $others = explode(',',$response[6]);
                         if(count($others) > 0 ) {
                             for ($i=0; $i < count($others); $i++) { 
-                                $key_value = explode('-',$others[$i]);
+                                $key_value = explode('^',$others[$i]);
                                 $other_arr[$key_value[0]] = $key_value[1];
                             }
                         }
@@ -437,7 +438,7 @@ class Studentfee extends Student_Controller
                                 'amount_detail'          => $json_array_amount_detail,
                             );
                             $student_fees_discount_id = null;
-                            // $inserted_id        = $this->studentfeemaster_model->fee_deposit($data_deposite, '', $student_fees_discount_id);
+                            $inserted_id = $this->studentfeemaster_model->fee_deposit($data_deposite, '', $student_fees_discount_id);
                            
                         }
                     } else {
@@ -457,13 +458,21 @@ class Studentfee extends Student_Controller
     }
     public function transaction_failure()
     {
+        // echo "<pre>";
+        // print_r($_REQUEST);
+        // echo "</pre>";
+        // die;
         $aes = new AESEncDec();
 
-                $key = "pWhMnIEMc4q6hKdiE99GGY4GK5";
+                // $key = "pWhMnIEMc4q6hKdiE99GGY4GK5";
+                $key = "/7WeUC15cruhrad/TYReUgNJAUEtujE43WRDN00oCRA=";
         $encData = $aes->decrypt($_REQUEST['encData'],$key);
                 // echo "Response for failure: " . $encData. "<br>";
                 // die;
-        $data = array();
+        $response = explode('|',$encData);
+        $data = array(
+            'order_id'          => $response[0],
+        );
         $this->load->view('layout/student/header', $data);
         $this->load->view('payment/transaction_failure', $data);
         $this->load->view('layout/student/footer', $data);

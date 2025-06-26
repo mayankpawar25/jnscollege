@@ -85,7 +85,10 @@
                             </div>
                             <h2>Payment Failed!</h2>
                             <div class="hr"></div>
-                            <h4>Something went wrong. <br>Taking you back home… Please try again!</h4>
+                            <h5><b>You order id : <?php echo $order_id;?></b></h5>
+                            <h4>Please contact your accounts department with reference to this order ID.</h4>
+                            <div class="hr"></div>
+                            <div style="margin-top:10px;">Please <a href="<?php echo base_url().'user/user/getfees'; ?>" style="display:inline;">click here</a> to go to the fees page.</div>
                         </div>
                     </div>
                 </div>
@@ -94,8 +97,3 @@
         </div>
     </section>
 </div>
-<script>
-    setTimeout(function () {
-        window.location.href = '<?php echo base_url().'user/user/getfees'; ?>'
-    }, 5000);
-</script>

@@ -362,7 +362,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                                                 
                                                                 $fee_groups_feetype_id = $fee_value->fee_groups_feetype_id;
                                                                 $student_fees_master_id = $fee->id;
-                                                                $other = 'fee_groups_feetype_id-'.$fee_groups_feetype_id.',student_fees_master_id-'.$student_fees_master_id;
+                                                                $other = 'fee_groups_feetype_id^'.$fee_groups_feetype_id.',student_fees_master_id^'.$student_fees_master_id;
                                                                 $key = "pWhMnIEMc4q6hKdi2Fx50Ii8CKAoSIqv9ScSpwuMHM4=";
                                                                 $requestParameter  = "1000605|DOM|IN|INR|$balance|$other|$successPage|$failedPage|SBIEPAY|$orderid|$student_id|NB|ONLINE|ONLINE";
                                                                 // MerchantID|DOMESTIC|IN|INR|Amount|Payment Purpose|successpage URL|Fail page URL|Aggregrator ID (Same as above)|Unique Order ID for each transactions|Customer Id|Paymode - Debit card, credit card|Access Medium|Transaction source
