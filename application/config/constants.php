@@ -103,3 +103,5 @@ define('INSERT_RECORD_CONSTANT', 'New Record inserted');
 define('UPDATE_RECORD_CONSTANT', 'Record updated');
 define('DELETE_RECORD_CONSTANT', 'Record deleted');
 define('IMPORT_RECORD_CONSTANT', 'Record imported');
+define('MERCHANT_ID', 1000605);
+define('SECRET_KEY', 'pWhMnIEMc4q6hKdi2Fx50Ii8CKAoSIqv9ScSpwuMHM4=');

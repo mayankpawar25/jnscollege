@@ -384,7 +384,8 @@ class Studentfee extends Student_Controller
                 $aes = new AESEncDec();
 
                 // $key = "pWhMnIEMc4q6hKdiE99GGY4GK5";
-                $key = "/7WeUC15cruhrad/TYReUgNJAUEtujE43WRDN00oCRA=";
+                // $key = "/7WeUC15cruhrad/TYReUgNJAUEtujE43WRDN00oCRA=";
+                $key = SECRET_KEY; //live key
                 $encData = $aes->decrypt($_REQUEST['encData'],$key);
                 // echo "Response for success: " . $encData. "<br>";
                 // die;
@@ -456,25 +457,23 @@ class Studentfee extends Student_Controller
     }
     public function transaction_failure()
     {
-        // echo "<pre>";
-        // print_r($_REQUEST);
-        // echo "</pre>";
-        // die;
         $aes = new AESEncDec();
 
-                // $key = "pWhMnIEMc4q6hKdiE99GGY4GK5";
-                $key = "/7WeUC15cruhrad/TYReUgNJAUEtujE43WRDN00oCRA=";
+        // $key = "pWhMnIEMc4q6hKdiE99GGY4GK5";
+        // $key = "/7WeUC15cruhrad/TYReUgNJAUEtujE43WRDN00oCRA=";
+        $key = SECRET_KEY; //live key
         $encData = $aes->decrypt($_REQUEST['encData'],$key);
                 // echo "Response for failure: " . $encData. "<br>";
                 // die;
         $response = explode('|',$encData);
         $data = array(
             'order_id'          => $response[0],
+            'failure_reason'   => $response[7],
         );
         $this->load->view('layout/student/header', $data);
         $this->load->view('payment/transaction_failure', $data);
         $this->load->view('layout/student/footer', $data);
-    }   
+    } 
 
     public function doubleVerification()
 	{
