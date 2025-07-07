@@ -1599,48 +1599,55 @@ class Student_model extends MY_Model
 
     public function getStudentsByArray($array)
     {
+        $this->db->query('SET SQL_BIG_SELECTS=1'); // 👈 add this line
 
-        $i             = 1;
+        $i = 1;
         $custom_fields = $this->customfield_model->get_custom_fields('students');
 
         $field_var_array = array();
         if (!empty($custom_fields)) {
             foreach ($custom_fields as $custom_fields_key => $custom_fields_value) {
                 $tb_counter = "table_custom_" . $i;
+
+                // Sanitize alias to avoid SQL error
+                $alias = preg_replace('/[^a-zA-Z0-9_]/', '_', $custom_fields_value->name);
+
                 if ($tb_counter === 'table_custom_7') {
-                    array_push($field_var_array, 'table_custom_' . $i . '.field_value as Enrollment_no');
+                    array_push($field_var_array, 'table_custom_' . $i . '.field_value as `Enrollment_no`');
                 } else {
-                    array_push($field_var_array, 'table_custom_' . $i . '.field_value as ' . $custom_fields_value->name);
+                    array_push($field_var_array, 'table_custom_' . $i . '.field_value as `' . $alias . '`');
                 }
-                $this->db->join('custom_field_values as ' . $tb_counter, 'students.id = ' . $tb_counter . '.belong_table_id AND ' . $tb_counter . '.custom_field_id = ' . $custom_fields_value->id, 'left');
+
+                $this->db->join(
+                    'custom_field_values as ' . $tb_counter,
+                    'students.id = ' . $tb_counter . '.belong_table_id AND ' . $tb_counter . '.custom_field_id = ' . $custom_fields_value->id,
+                    'left'
+                );
                 $i++;
             }
         }
 
         $field_variable = implode(',', $field_var_array);
+        try {
+            $this->db->select('classes.id AS `class_id`, student_session.id as student_session_id, students.id, classes.class, sections.id AS `section_id`, sections.section, students.id, students.admission_no, students.roll_no, students.admission_date, students.firstname, students.middlename, students.lastname, students.image, students.mobileno, students.email, students.state, students.city, students.pincode, students.religion, students.dob, students.current_address, students.blood_group, students.permanent_address, IFNULL(students.category_id, 0) as `category_id`, IFNULL(categories.category, "") as `category`, students.adhar_no, students.samagra_id, students.bank_account_no, students.cast, students.bank_name, students.ifsc_code, students.guardian_name, students.guardian_relation, students.guardian_phone, students.guardian_address, students.is_active, students.created_at, students.mother_name, students.updated_at, students.father_name, students.rte, students.gender, users.id as `user_tbl_id`, users.username, users.password as `user_tbl_password`, users.is_active as `user_tbl_active`, ' . $field_variable)->from('students');
+    
+            $this->db->join('student_session', 'student_session.student_id = students.id');
+            $this->db->join('classes', 'student_session.class_id = classes.id');
+            $this->db->join('sections', 'sections.id = student_session.section_id');
+            $this->db->join('categories', 'students.category_id = categories.id', 'left');
+            $this->db->join('users', 'users.user_id = students.id', 'left');
+            $this->db->where('student_session.session_id', $this->current_session);
+            $this->db->where('users.role', 'student');
+            $this->db->where_in('students.id', $array);
+            $this->db->order_by('students.id');
+            $this->db->group_by('students.id');
+    
+            $query = $this->db->get();
+            return $query->result();
+        } catch (Exception $e) {
+            return array();
+        }   
 
-
-        $this->db->select('classes.id AS `class_id`,student_session.id as student_session_id,students.id,classes.class,sections.id AS `section_id`,sections.section,students.id,students.admission_no , students.roll_no,students.admission_date,students.firstname, students.middlename,students.lastname,students.image,   students.mobileno,students.email,students.state,students.city,students.pincode,students.religion,     students.dob ,students.current_address,students.blood_group,students.permanent_address,IFNULL(students.category_id, 0) as `category_id`,IFNULL(categories.category, "") as `category`,students.adhar_no,students.samagra_id,students.bank_account_no,students.cast,students.bank_name, students.ifsc_code,students.guardian_name, students.guardian_relation,students.guardian_phone,students.guardian_address,students.is_active ,students.created_at ,students.mother_name,students.updated_at,students.father_name,students.rte,students.gender,users.id as `user_tbl_id`,users.username,users.password as `user_tbl_password`,users.is_active as `user_tbl_active`,' . $field_variable)->from('students');
-        $this->db->join('student_session', 'student_session.student_id = students.id');
-        $this->db->join('classes', 'student_session.class_id = classes.id');
-        $this->db->join('sections', 'sections.id = student_session.section_id');
-        $this->db->join('categories', 'students.category_id = categories.id', 'left');
-        $this->db->join('users', 'users.user_id = students.id', 'left');
-        $this->db->where('student_session.session_id', $this->current_session);
-        $this->db->where('users.role', 'student');
-        $this->db->where_in('students.id', $array);
-        $this->db->order_by('students.id');
-        $this->db->group_by('students.id');
-        $query = $this->db->get();
-
-        // $sql = $this->db->get_compiled_select();
-        // echo $sql;
-        // echo "<pre>";
-        // print_r( $query->result());
-        // echo "</pre>";
-        // exit;
-
-        return $query->result();
     }
 
     public function get_studentsession($student_session_id)
