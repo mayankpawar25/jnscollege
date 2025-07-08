@@ -477,67 +477,82 @@ class Studentfee extends Student_Controller
 
     public function doubleVerification()
 	{
-        if(isset($_GET['order_id']) && !empty($_GET['order_id']) && isset($_GET['amount']) && !empty($_GET['amount']) && (float)$_GET['amount'] > 0) {
-            $merchant_order_no=$_GET['order_id'];
-            $merchantid=1000605;
-            $amount=(float)$_GET['amount'];
-            $url="https://test.sbiepay.sbi/payagg/statusQuery/getStatusQuery";
-            $queryRequest="|$merchantid|$merchant_order_no|$amount"; 
-            echo "queryRequest: " . $queryRequest. "<br><br>";
-            $queryRequest33=http_build_query(array('queryRequest' => $queryRequest,'aggregatorId'=>'SBIEPAY','merchantId'=>$merchantid));
-            
+        $log_file = FCPATH . 'application/logs/studentfee_double_verification_' . date('Ymd') . '.log';
+
+        if (isset($_GET['order_id']) && !empty($_GET['order_id']) && isset($_GET['amount']) && !empty($_GET['amount']) && (float)$_GET['amount'] > 0) {
+            $merchant_order_no = $_GET['order_id'];
+            $merchantid = MERCHANT_ID;
+            $amount = (float)$_GET['amount'];
+            $url = "https://test.sbiepay.sbi/payagg/statusQuery/getStatusQuery";
+            $queryRequest = "|$merchantid|$merchant_order_no|$amount";
+            $log_msg = "[" . date('Y-m-d H:i:s') . "] Single QueryRequest: $queryRequest\n";
+            file_put_contents($log_file, $log_msg, FILE_APPEND);
+
+            echo "queryRequest: " . $queryRequest . "<br><br>";
+            $queryRequest33 = http_build_query(array('queryRequest' => $queryRequest, 'aggregatorId' => 'SBIEPAY', 'merchantId' => $merchantid));
+
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,false); 
-            curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1);
             curl_setopt($ch, CURLOPT_SSLVERSION, 6);
             curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-            curl_setopt($ch,CURLOPT_POSTFIELDS, $queryRequest33);
-            $response = curl_exec ($ch);			
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $queryRequest33);
+            $response = curl_exec($ch);
             if (curl_errno($ch)) {
-                echo $error_msg = curl_error($ch);
-            }				
-            curl_close ($ch);
-            echo "response: " . $response. "<br><br><br><br>";
-            $response = explode('|',$response);
+                $error_msg = curl_error($ch);
+                file_put_contents($log_file, "[" . date('Y-m-d H:i:s') . "] CURL ERROR: $error_msg\n", FILE_APPEND);
+                echo $error_msg;
+            }
+            curl_close($ch);
+            file_put_contents($log_file, "[" . date('Y-m-d H:i:s') . "] Response: $response\n", FILE_APPEND);
+            echo "response: " . $response . "<br><br><br><br>";
+            $response = explode('|', $response);
         } else {
-            //$this->sbiDoubleVerification();
-            
-        // Fetch records where transaction_status = 'PENDING'
             $query = $this->db->get_where('student_transactions', ['transaction_status' => 'PENDING']);
             $results = $query->result(); // Fetch multiple rows as objects
 
             // Loop through the records
             foreach ($results as $row) {
-                echo "Transaction ID: " . $row->id . " - Status: " . $row->transaction_status . "<br>";
-            
+                $log_msg = "[" . date('Y-m-d H:i:s') . "] Transaction ID: {$row->id} - Status: {$row->transaction_status}\n";
+                file_put_contents($log_file, $log_msg, FILE_APPEND);
 
-                $merchant_order_no=$row->order_id; // merchant order no
-                $merchantid=$row->marchant_id;  //merchant id
-                $amount=$row->transaction_amount; // Transaction posting Amount 
-                $url="https://test.sbiepay.sbi/payagg/statusQuery/getStatusQuery";
-                $queryRequest="|$merchantid|$merchant_order_no|$amount"; 
-                echo "queryRequest: " . $queryRequest. "<br>";
-                $queryRequest33=http_build_query(array('queryRequest' => $queryRequest,'aggregatorId'=>'SBIEPAY','merchantId'=>$merchantid));
-                
+                echo "Transaction ID: " . $row->id . " - Status: " . $row->transaction_status . "<br>";
+
+                $merchant_order_no = $row->order_id; // merchant order no
+                $merchantid = $row->marchant_id;  //merchant id
+                $amount = $row->transaction_amount; // Transaction posting Amount 
+                $url = "https://test.sbiepay.sbi/payagg/statusQuery/getStatusQuery";
+                $queryRequest = "|$merchantid|$merchant_order_no|$amount";
+                $log_msg = "[" . date('Y-m-d H:i:s') . "] QueryRequest: $queryRequest\n";
+                file_put_contents($log_file, $log_msg, FILE_APPEND);
+
+                echo "queryRequest: " . $queryRequest . "<br>";
+                $queryRequest33 = http_build_query(array('queryRequest' => $queryRequest, 'aggregatorId' => 'SBIEPAY', 'merchantId' => $merchantid));
+
                 $ch = curl_init($url);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,false); 
-                curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,1);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1);
                 curl_setopt($ch, CURLOPT_SSLVERSION, 6);
                 curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-                curl_setopt($ch,CURLOPT_POSTFIELDS, $queryRequest33);
-                $response = curl_exec ($ch);			
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $queryRequest33);
+                $response = curl_exec($ch);
                 if (curl_errno($ch)) {
-                    echo $error_msg = curl_error($ch);
-                }				
-                curl_close ($ch);
-                echo "response: " . $response. "<br><br><br><br>";
-                $response = explode('|',$response);
-                    
-                if(count($response) > 0 && $response[2] == 'SUCCESS') {
+                    $error_msg = curl_error($ch);
+                    file_put_contents($log_file, "[" . date('Y-m-d H:i:s') . "] CURL ERROR: $error_msg\n", FILE_APPEND);
+                    echo $error_msg;
+                }
+                curl_close($ch);
+                file_put_contents($log_file, "[" . date('Y-m-d H:i:s') . "] Response: $response\n", FILE_APPEND);
+
+                echo "response: " . $response . "<br><br><br><br>";
+                $response = explode('|', $response);
+
+                if (count($response) > 0 && $response[2] == 'SUCCESS') {
                     $this->db->where('id', $row->id);
                     $this->db->update('student_transactions', ['transaction_status' => 'SUCCESS']);
+                    file_put_contents($log_file, "[" . date('Y-m-d H:i:s') . "] Transaction ID {$row->id} marked as SUCCESS\n", FILE_APPEND);
                 }
             }
         }
