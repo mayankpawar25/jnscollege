@@ -261,7 +261,11 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                     dataType: 'JSON',
                     data: {'data': JSON.stringify(array_to_print), 'class_id': classId, 'id_card': idCard, },
                     success: function (response) {
-                        Popup(response.page);
+                        if(response.status) {
+                            Popup(response.page);
+                        } else {
+                            alert(response.error);
+                        }
                     },
                     error: function(err){
                           console.log("error data");
