@@ -48,6 +48,8 @@ foreach ($unread_notifications as $notice_key => $notice_value) {
                     }
                 }
                 ?>" alt="User profile picture">
+                <!-- Flash message area -->
+                
                 <div style="display: none;">
                     <form action="<?php echo site_url("user/user/updateStudentImage") ?>" id="employeeform" name="employeeform" method="post" accept-charset="utf-8" enctype="multipart/form-data">
                         <div class="col-md-3">
@@ -69,6 +71,12 @@ foreach ($unread_notifications as $notice_key => $notice_value) {
 <?php if ($sch_setting->roll_no) {?>
 <h5 class="widget-user-desc" ><?php echo $this->lang->line('roll_number'); ?> <span class="text-aqua" id="student_roll_no_label"><?php echo $student['roll_no']; ?></span></h5>
 <?php }?>
+<div id="flash-message-area">
+                    <?php if ($this->session->flashdata('msg')): ?>
+                        <div class="text-danger text-left">Image size should not be more than 2MB.</div>
+                        <?php $this->session->unset_userdata('msg'); // destroy flashdata after use ?>
+                    <?php endif; ?>
+                </div>
 </div></div>               
  
                <div class="box-body box-profile pt0">
@@ -2387,6 +2395,7 @@ if ($consolidate_exam_result_percentage) {
                   <input  name="first_doc" placeholder="" type="file" class="form-control filestyle" data-height="40"  value="<?php echo set_value('first_doc'); ?>" />
                   <span class="text-danger"><?php echo form_error('first_doc'); ?></span></div>
                </div>
+               <div class="text-danger text-left">Please upload a valid document. Maximum file size allowed: 2MB.</div>
                </div>
          </div>
          <div class="modal-footer" style="clear:both"> 
