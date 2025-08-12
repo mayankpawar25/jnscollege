@@ -101,7 +101,9 @@ if($id_card[0]->enable_vertical_card)
 													echo $this->media_storage->getImageURL("uploads/student_images/default_female.jpg");
 												} elseif ($student->gender == 'Male') {
 													echo $this->media_storage->getImageURL("uploads/student_images/default_male.jpg");
-												}
+												} else {
+                                                    echo $this->media_storage->getImageURL("uploads/student_images/default.png");
+                                                }
 
 											}
 											?>" class="img-responsive img-circle block-center" style="border-radius: 8px; border:3px solid <?php echo $id_card[0]->header_color; ?>">
@@ -219,6 +221,8 @@ if($id_card[0]->enable_vertical_card)
                                                     echo $this->media_storage->getImageURL("uploads/student_images/default_female.jpg");
                                                 } elseif ($student->gender == 'Male') {
                                                     echo $this->media_storage->getImageURL("uploads/student_images/default_male.jpg");
+                                                } else {
+                                                    echo $this->media_storage->getImageURL("uploads/student_images/default.png");
                                                 }
 
                                             }

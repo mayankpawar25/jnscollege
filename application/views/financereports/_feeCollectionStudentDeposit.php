@@ -54,9 +54,9 @@ foreach ($student_list as $student_key => $student_value) {
 					<?php  
                   
 
-					if( is_object($fees_value) && (array_key_exists('collected_by', $fees_value) )) { 			
-						echo $fees_value->collected_by;	
-					} 	   
+					if (is_object($fees_value) && property_exists($fees_value, 'collected_by')) {
+                        echo $fees_value->collected_by;
+                    } 	   
 					?>
 				</td>
 		    	<td class="text text-right"><strong><?php echo $currency_symbol.amountFormat($fees_value->amount_fine);  ?></strong></td>		

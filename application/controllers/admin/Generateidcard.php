@@ -94,6 +94,10 @@ class Generateidcard extends Admin_Controller
         }
       
         $students = $this->student_model->getStudentsByArray($std_arr);
+        if (count($students) == 0) {
+            echo json_encode(array('status' => 0, 'error' => 'No id card found for selected students'));
+            return;
+        }
         foreach ($students as $key => $students_value) {
             $students[$key]->barcode = $this->customlib->generatebarcode($students_value->admission_no);
         }

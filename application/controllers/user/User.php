@@ -892,6 +892,14 @@ class User extends Student_Controller
             $student_id = $this->input->post('student_id');
 
             if (isset($_FILES["first_doc"]) && !empty($_FILES['first_doc']['name'])) {
+                if ($_FILES['first_doc']['size'] > 2 * 1024 * 1024) {
+                    $msg = array(
+                        'first_doc' => 'File size should not be more than 2MB.'
+                    );
+                    $array = array('status' => 'fail', 'error' => $msg, 'message' => '');
+                    echo json_encode($array);
+                    return;
+                }
                 $uploaddir = './uploads/student_documents/' . $student_id . '/';
                 if (!is_dir($uploaddir) && !mkdir($uploaddir)) {
                     die("Error creating folder $uploaddir");
@@ -1420,6 +1428,12 @@ class User extends Student_Controller
     {
         $id = $this->customlib->getStudentSessionUserID();
         if (isset($_FILES["file"]) && !empty($_FILES['file']['name'])) {
+            // Check file size (max 2MB)
+            if ($_FILES["file"]["size"] > 2 * 1024 * 1024) {
+                $this->session->set_flashdata('msg', '<div class="alert alert-danger text-left">Image size should not be more than 2MB.</div>');
+                redirect('user/user/profile');
+                return;
+            }
             $fileInfo = pathinfo($_FILES["file"]["name"]);
             $img_name = $id . '.' . $fileInfo['extension'];
             move_uploaded_file($_FILES["file"]["tmp_name"], "./uploads/student_images/" . $img_name);

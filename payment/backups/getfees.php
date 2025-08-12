@@ -1,4 +1,3 @@
-<?php include(FCPATH . 'payment/AES128_php.php'); ?>
 <?php
 
 $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
@@ -352,54 +351,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                                                     </form>
                                                             <?php
 
-                                                            } else if(true){ 
-                                                                // get student name from student table using id = $student['id']
-                                                                $CI =& get_instance();
-                                                                $CI->load->database();
-                                                                $CI->db->select('firstname, middlename, lastname');
-                                                                $CI->db->from('students');
-                                                                $CI->db->where('id', $student['id']);
-                                                                $student_row = $CI->db->get()->row_array();
-                                                                $student_name = '';
-                                                                if ($student_row) {
-                                                                    $student_name = $student_row['firstname'];
-                                                                    if (!empty($student_row['middlename'])) {
-                                                                        $student_name .= ' ' . $student_row['middlename'];
-                                                                    }
-                                                                    if (!empty($student_row['lastname'])) {
-                                                                        $student_name .= ' ' . $student_row['lastname'];
-                                                                    }
                                                                 }
-                                                                // echo $student_name;
-                                                                // echo "<pre>";
-                                                                // print_r($student);
-                                                                $orderid = uniqid();
-                                                                $student_id = $student['id'];
-                                                                $orderid .= '_'.$student_id;
-                                                                $successPage = base_url().'user/studentfee/transaction_success';
-                                                                $failedPage = base_url().'user/studentfee/transaction_failure';
-                                                                $balance = $feetype_balance;
-                                                                
-                                                                $fee_groups_feetype_id = $fee_value->fee_groups_feetype_id;
-                                                                $student_fees_master_id = $fee->id;
-                                                                // $other = 'fee_groups_feetype_id^'.$fee_groups_feetype_id.',student_fees_master_id^'.$student_fees_master_id;
-                                                                $other = $student_name.'^'.$student_id.'^'.$fee_groups_feetype_id.'^'.$student_fees_master_id;
-                                                                $key = "pWhMnIEMc4q6hKdi2Fx50Ii8CKAoSIqv9ScSpwuMHM4=";
-                                                                $merchant_id = MERCHANT_ID;
-                                                                $requestParameter  = "$merchant_id|DOM|IN|INR|$balance|$other|$successPage|$failedPage|SBIEPAY|$orderid|$student_id|NB|ONLINE|ONLINE";
-                                                                // MerchantID|DOMESTIC|IN|INR|Amount|Payment Purpose|successpage URL|Fail page URL|Aggregrator ID (Same as above)|Unique Order ID for each transactions|Customer Id|Paymode - Debit card, credit card|Access Medium|Transaction source
-                                                                $aes = new AESEncDec();
-                                                                $EncryptTrans = $aes->encrypt($requestParameter, $key);
-                                                                ?>
-                                                                <form name="eco" class="form_fees1" action="https://test.sbiepay.sbi/secure/AggregatorHostedListener" method="POST" autocomplete="off">
-                                                                    <input type="hidden" name="EncryptTrans" value="<?php echo $EncryptTrans; ?>">
-                                                                    <input type="hidden" name="merchIdVal" value="<?php echo $merchant_id; ?>" />
-                                                                    <input type="hidden" name="balance" value="<?php echo $balance;?>" />
-                                                                    <input type="hidden" name="student_id" value="<?php echo $student_id;?>" />
-                                                                    <button class="btn btn-xs btn-primary" type="submit">
-                                                                        <i class="fa fa-money" title="SBI pay"></i> <?php echo $this->lang->line('pay'); ?></button>
-                                                                </form>
-                                                            <?php }
                                                             }
                                                             ?>
                                                         </div>

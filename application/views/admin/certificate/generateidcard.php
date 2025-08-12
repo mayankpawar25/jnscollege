@@ -261,7 +261,11 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                     dataType: 'JSON',
                     data: {'data': JSON.stringify(array_to_print), 'class_id': classId, 'id_card': idCard, },
                     success: function (response) {
-                        Popup(response.page);
+                        if(response.status) {
+                            Popup(response.page);
+                        } else {
+                            alert(response.error);
+                        }
                     },
                     error: function(err){
                           console.log("error data");
@@ -274,7 +278,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
 <script type="text/javascript">
 
     var base_url = '<?php echo base_url() ?>';
-    function Popup(data)
+    function Popup1(data)
     {
 
         var frame1 = $('<iframe>', {
@@ -285,7 +289,6 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
         $("body").append(frame1);
         var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
         frameDoc.document.open();
-//Create a new HTML document.
         frameDoc.document.write('<html>');
         frameDoc.document.write('<head>');
         frameDoc.document.write('<title></title>');
@@ -303,4 +306,54 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
 
         return true;
     }
+
+    function Popup(data) {
+        var frame1 = $('<iframe>', {
+            id: 'printDiv',
+            name: 'frame1',
+            style: 'position:absolute;top:-1000px;left:-1000px;' // keep hidden
+        });
+
+        $("body").append(frame1);
+
+        var frameDoc = frame1[0].contentWindow || frame1[0].contentDocument.document || frame1[0].contentDocument;
+
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title></head><body>');
+        frameDoc.document.write(data);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+
+        // Delay to ensure DOM is ready
+        setTimeout(function () {
+            var imgs = frameDoc.document.getElementsByTagName('img');
+            var totalImgs = imgs.length;
+            var loadedImgs = 0;
+
+            if (totalImgs === 0) {
+                printFrame();
+            } else {
+                for (var i = 0; i < totalImgs; i++) {
+                    // Trigger load check
+                    imgs[i].addEventListener('load', checkAllLoaded);
+                    imgs[i].addEventListener('error', checkAllLoaded);
+                }
+            }
+
+            function checkAllLoaded() {
+                loadedImgs++;
+                if (loadedImgs >= totalImgs) {
+                    printFrame();
+                }
+            }
+
+            function printFrame() {
+                frame1[0].contentWindow.focus();
+                frame1[0].contentWindow.print();
+                frame1.remove();
+            }
+        }, 100); // short delay so images start loading
+    }
+
+
 </script>

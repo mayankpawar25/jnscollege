@@ -82,7 +82,9 @@
                                 <h2>Payment Successful!</h2>
                                 <div class="hr"></div>
                                 <h5><b>You order id : <?php echo $order_id;?></b></h5>
-                                <h4>Your payment has been processed successfully.<br> Taking you back home… Hang tight!</h4>
+                                <h4>Your payment has been processed successfully.</h4>
+                                <div class="hr"></div>
+                                <div style="margin-top:10px;">Please <a href="<?php echo base_url().'user/user/getfees'; ?>" style="display:inline;">click here</a> to go to the fees page.</div>
                             </div>
                         </div>
                     </div>
@@ -113,8 +115,3 @@
         </div>
     </section>
 </div>
-<script>
-    setTimeout(function () {
-        window.location.href = '<?php echo base_url().'user/user/getfees'; ?>'
-    }, 5000);
-</script>
