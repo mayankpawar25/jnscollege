@@ -261,7 +261,11 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                     dataType: 'JSON',
                     data: {'data': JSON.stringify(array_to_print), 'class_id': classId, 'id_card': idCard, },
                     success: function (response) {
-                        Popup(response.page);
+                        if(response.status) {
+                            Popup(response.page);
+                        } else {
+                            alert(response.error);
+                        }
                     },
                     error: function(err){
                           console.log("error data");
@@ -274,32 +278,92 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
 <script type="text/javascript">
 
     var base_url = '<?php echo base_url() ?>';
-    function Popup(data)
-    {
+    function waitForPrintAssets(iframeEl, timeoutMs) {
+        var deferred = $.Deferred();
+        var start = Date.now();
 
+        function check() {
+            var doc = (iframeEl.contentDocument || (iframeEl.contentWindow && iframeEl.contentWindow.document));
+            if (!doc) {
+                if ((Date.now() - start) > timeoutMs) {
+                    return deferred.resolve();
+                }
+                return setTimeout(check, 100);
+            }
+
+            var images = doc.images ? Array.prototype.slice.call(doc.images) : [];
+            var imagesReady = images.every(function (img) { return img.complete; });
+
+            var fontsReady = true;
+            if (doc.fonts && typeof doc.fonts.ready !== 'undefined') {
+                fontsReady = (doc.fonts.status === 'loaded');
+            }
+
+            if (imagesReady && fontsReady) {
+                return deferred.resolve();
+            }
+
+            if ((Date.now() - start) > timeoutMs) {
+                return deferred.resolve();
+            }
+
+            setTimeout(check, 100);
+        }
+
+        setTimeout(check, 50);
+        return deferred.promise();
+    }
+
+    function Popup(data) {
+        var frameId = 'printDiv_' + Date.now();
         var frame1 = $('<iframe>', {
-           id:  'printDiv',
-           name:  'frame1'
+            id: frameId,
+            name: frameId
+        }).css({
+            position: 'absolute',
+            left: '-9999px',
+            top: '0',
+            width: '0',
+            height: '0',
+            border: '0'
         });
 
+        // Remove any old/leftover print frames.
+        $("iframe[id^='printDiv_']").remove();
+
         $("body").append(frame1);
-        var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
-        frameDoc.document.open();
-//Create a new HTML document.
-        frameDoc.document.write('<html>');
-        frameDoc.document.write('<head>');
-        frameDoc.document.write('<title></title>');
-        frameDoc.document.write('</head>');
-        frameDoc.document.write('<body>');
-        frameDoc.document.write(data);
-        frameDoc.document.write('</body>');
-        frameDoc.document.write('</html>');
-        frameDoc.document.close();
-        setTimeout(function () {
-        document.getElementById('printDiv').contentWindow.focus();
-        document.getElementById('printDiv').contentWindow.print();
-            frame1.remove();
-        }, 1000);
+
+        var iframeEl = frame1[0];
+        var frameDoc = (iframeEl.contentDocument || (iframeEl.contentWindow && iframeEl.contentWindow.document));
+        frameDoc.open();
+        frameDoc.write('<!doctype html>');
+        frameDoc.write('<html>');
+        frameDoc.write('<head>');
+        frameDoc.write('<meta charset="utf-8">');
+        frameDoc.write('<title></title>');
+        frameDoc.write('</head>');
+        frameDoc.write('<body>');
+        frameDoc.write(data);
+        frameDoc.write('</body>');
+        frameDoc.write('</html>');
+        frameDoc.close();
+
+        waitForPrintAssets(iframeEl, 60000).always(function () {
+            var win = iframeEl.contentWindow;
+            var cleanup = function () { frame1.remove(); };
+
+            if (win) {
+                try {
+                    win.onafterprint = cleanup;
+                } catch (e) {
+                }
+                win.focus();
+                win.print();
+            }
+
+            // Fallback cleanup in case onafterprint doesn't fire.
+            setTimeout(cleanup, 20000);
+        });
 
         return true;
     }
