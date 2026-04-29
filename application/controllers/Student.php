@@ -2558,6 +2558,8 @@ class Student extends Admin_Controller
                 }
 
                 $row   = array();
+                $checkbox = '<input type="checkbox" class="student-check" name="student[]" value="' . $student->id . '" data-phone="' . $student->mobileno . '">';
+                $row[] = $checkbox;
                 $row[] = $student->admission_no;
                 $row[] = "<a href='" . base_url() . "student/view/" . $student->id . "'>" . $this->customlib->getFullName($student->firstname, $student->middlename, $student->lastname, $sch_setting->middlename, $sch_setting->lastname) . "</a>";
                 $row[] = $student->class . "(" . $student->section . ")";
@@ -2639,6 +2641,309 @@ class Student extends Admin_Controller
             $params = array('srch_type' => 'search_full', 'class_id' => $class_id, 'section_id' => $section_id, 'yojna' => $yojna,  'search_text' => $search_text);
             $array  = array('status' => 1, 'error' => '', 'params' => $params);
             echo json_encode($array);
+        }
+    }
+
+    public function sendWhatsappCredentials()
+    {
+        if (!$this->rbac->hasPrivilege('student', 'can_view')) {
+            echo json_encode(array('status' => 0, 'message' => 'Access Denied'));
+            exit;
+        }
+
+        $student_ids = $this->input->post('student_ids');
+
+        if (empty($student_ids)) {
+            echo json_encode(array('status' => 0, 'message' => 'No students selected'));
+            exit;
+        }
+
+        $setting = $this->setting_model->getSetting();
+        $whatsapp_access_token = $setting->whatsapp_access_token ?? '';
+        $phone_number_id = $setting->whatsapp_phone_id ?? '';
+
+        if (empty($whatsapp_access_token) || empty($phone_number_id)) {
+            echo json_encode(array('status' => 0, 'message' => 'WhatsApp credentials not configured. Please configure them in System Settings'));
+            exit;
+        }
+
+        $success_count = 0;
+        $failed_count = 0;
+        $errors = array();
+
+        foreach ($student_ids as $student_id) {
+            $student = $this->student_model->get($student_id);
+
+            if (empty($student) || empty($student['mobileno'])) {
+                $failed_count++;
+                $errors[] = 'Student #' . $student_id . ': Missing mobile number';
+                continue;
+            }
+
+            $user = $this->db->get_where('users', array('user_id' => $student_id, 'role' => 'student'))->row_array();
+
+            if (empty($user)) {
+                $failed_count++;
+                $errors[] = 'Student #' . $student_id . ': No user account found';
+                continue;
+            }
+
+            $student_name = $student['firstname'] . ' ' . $student['lastname'];
+            $username = $user['username'];
+            $password = $user['password'];
+
+            $phone_number = $this->formatPhoneNumber($student['mobileno']);
+
+            $result = $this->sendWhatsappMessage($phone_number, $student_name, $username, $password, $whatsapp_access_token, $phone_number_id);
+
+            if ($result['status']) {
+                $success_count++;
+            } else {
+                $failed_count++;
+                $errors[] = 'Student #' . $student_id . ': ' . $result['error'];
+            }
+        }
+
+        $message = 'Successfully sent to ' . $success_count . ' student(s)';
+        if ($failed_count > 0) {
+            $message .= '. Failed: ' . $failed_count;
+        }
+
+        echo json_encode(array('status' => 1, 'message' => $message, 'success' => $success_count, 'failed' => $failed_count, 'errors' => $errors));
+    }
+
+    private function formatPhoneNumber($phone)
+    {
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+        if (strlen($phone) == 10) {
+            $phone = '91' . $phone;
+        }
+        return $phone;
+    }
+
+    private function sendStudentMessage($phone_number, $student_name, $username, $password, $access_token, $phone_number_id)
+    {
+        $url = "https://graph.facebook.com/v18.0/{$phone_number_id}/messages";
+
+        $message_body = "Hi " . $student_name . ",\n\n";
+        $message_body .= "Please find your account login details below. Kindly keep this information secure for safety purposes:\n\n";
+        $message_body .= "Username: " . $username . "\n";
+        $message_body .= "Password: " . $password . "\n\n";
+        $message_body .= "If you have any questions or need assistance, feel free to reach out.";
+
+        $data = array(
+            'messaging_product' => 'whatsapp',
+            'to' => $phone_number,
+            'type' => 'text',
+            'text' => array(
+                'body' => $message_body
+            )
+        );
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $access_token
+        ));
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch);
+        curl_close($ch);
+
+        if ($http_code == 200) {
+            return array('status' => true);
+        } else {
+            $error_msg = 'WhatsApp API error: HTTP ' . $http_code;
+            if (!empty($curl_error)) {
+                $error_msg .= ' - ' . $curl_error;
+            }
+            if (!empty($response)) {
+                $error_msg .= ' - ' . $response;
+            }
+            return array('status' => false, 'error' => $error_msg);
+        }
+    }
+
+    private function sendWhatsappMessage($phone_number, $student_name, $username, $password, $access_token, $phone_number_id)
+    {
+        $url = "https://graph.facebook.com/v18.0/{$phone_number_id}/messages";
+
+        $data = array(
+            'messaging_product' => 'whatsapp',
+            'to' => $phone_number,
+            'type' => 'template',
+            'template' => array(
+                'name' => 'auth_detials',
+                'language' => array(
+                    'code' => 'en'
+                ),
+                'components' => array(
+                    array(
+                        'type' => 'body',
+                        'parameters' => array(
+                            array('type' => 'text', 'text' => $student_name),
+                            array('type' => 'text', 'text' => $username),
+                            array('type' => 'text', 'text' => $password)
+                        )
+                    )
+                )
+            )
+        );
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $access_token
+        ));
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch);
+        curl_close($ch);
+
+        if ($http_code == 200) {
+            return array('status' => true);
+        } else {
+            $error_msg = 'WhatsApp API error: HTTP ' . $http_code;
+            if (!empty($curl_error)) {
+                $error_msg .= ' - ' . $curl_error;
+            }
+            if (!empty($response)) {
+                $error_msg .= ' - ' . $response;
+            }
+            return array('status' => false, 'error' => $error_msg);
+        }
+    }
+
+    public function sendFatherLoginInfo()
+    {
+        if (!$this->rbac->hasPrivilege('student', 'can_view')) {
+            echo json_encode(array('status' => 0, 'message' => 'Access Denied'));
+            exit;
+        }
+
+        $student_ids = $this->input->post('student_ids');
+
+        if (empty($student_ids)) {
+            echo json_encode(array('status' => 0, 'message' => 'No students selected'));
+            exit;
+        }
+
+        $setting = $this->setting_model->getSetting();
+        $whatsapp_access_token = $setting->whatsapp_access_token ?? '';
+        $phone_number_id = $setting->whatsapp_phone_id ?? '';
+
+        if (empty($whatsapp_access_token) || empty($phone_number_id)) {
+            echo json_encode(array('status' => 0, 'message' => 'WhatsApp credentials not configured. Please configure them in System Settings'));
+            exit;
+        }
+
+        $success_count = 0;
+        $failed_count = 0;
+        $errors = array();
+
+        foreach ($student_ids as $student_id) {
+            $student = $this->student_model->get($student_id);
+
+            if (empty($student) || empty($student['father_phone'])) {
+                $failed_count++;
+                $errors[] = 'Student #' . $student_id . ': Father phone number not found';
+                continue;
+            }
+
+            $father_user = $this->db->get_where('users', array('user_id' => $student_id, 'role' => 'parent'))->row_array();
+
+            if (empty($father_user)) {
+                $failed_count++;
+                $errors[] = 'Student #' . $student_id . ': No parent account found';
+                continue;
+            }
+
+            $father_name = $student['father_name'] ?? 'Parent';
+            $username = $father_user['username'];
+            $password = $father_user['password'];
+
+            $phone_number = $this->formatPhoneNumber($student['father_phone']);
+
+            $result = $this->sendFatherMessage($phone_number, $father_name, $username, $password, $whatsapp_access_token, $phone_number_id);
+
+            if ($result['status']) {
+                $success_count++;
+            } else {
+                $failed_count++;
+                $errors[] = 'Student #' . $student_id . ': ' . $result['error'];
+            }
+        }
+
+        $message = 'Successfully sent to ' . $success_count . ' parent(s)';
+        if ($failed_count > 0) {
+            $message .= '. Failed: ' . $failed_count;
+        }
+
+        echo json_encode(array('status' => 1, 'message' => $message, 'success' => $success_count, 'failed' => $failed_count, 'errors' => $errors));
+    }
+
+    private function sendFatherMessage($phone_number, $father_name, $username, $password, $access_token, $phone_number_id)
+    {
+        $url = "https://graph.facebook.com/v18.0/{$phone_number_id}/messages";
+
+        $data = array(
+            'messaging_product' => 'whatsapp',
+            'to' => $phone_number,
+            'type' => 'template',
+            'template' => array(
+                'name' => 'parent_cred',
+                'language' => array(
+                    'code' => 'en'
+                ),
+                'components' => array(
+                    array(
+                        'type' => 'body',
+                        'parameters' => array(
+                            array('type' => 'text', 'text' => $father_name),
+                            array('type' => 'text', 'text' => $username),
+                            array('type' => 'text', 'text' => $password)
+                        )
+                    )
+                )
+            )
+        );
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $access_token
+        ));
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch);
+        curl_close($ch);
+
+        if ($http_code == 200) {
+            return array('status' => true);
+        } else {
+            $error_msg = 'WhatsApp API error: HTTP ' . $http_code;
+            if (!empty($curl_error)) {
+                $error_msg .= ' - ' . $curl_error;
+            }
+            if (!empty($response)) {
+                $error_msg .= ' - ' . $response;
+            }
+            return array('status' => false, 'error' => $error_msg);
         }
     }
 

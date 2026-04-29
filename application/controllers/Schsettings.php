@@ -826,5 +826,73 @@ class Schsettings extends Admin_Controller
             echo json_encode($array);
         }
     }
-    
+
+    public function whatsapp()
+    {
+        if (!$this->rbac->hasPrivilege('general_setting', 'can_view')) {
+            access_denied();
+        }
+
+        $this->session->set_userdata('top_menu', 'System Settings');
+        $this->session->set_userdata('sub_menu', 'schsettings/whatsapp');
+        $this->session->set_userdata('subsub_menu', 'schsettings/whatsapp');
+
+        $setting = $this->setting_model->getSetting();
+        $data['result'] = $setting;
+        $data['error'] = '';
+        $data['success_msg'] = '';
+
+        if ($this->input->post('save_whatsapp_config')) {
+            $phone_id = trim($this->input->post('whatsapp_phone_id'));
+            $access_token = trim($this->input->post('whatsapp_access_token'));
+
+            if (!empty($phone_id) && !empty($access_token)) {
+                // Use raw SQL for reliable update
+                $query = "UPDATE sch_settings SET whatsapp_phone_id = ?, whatsapp_access_token = ? WHERE id = 1";
+                $this->db->query($query, array($phone_id, $access_token));
+
+                $data['success_msg'] = 'WhatsApp configuration saved successfully!';
+                // Refresh settings
+                $setting = $this->setting_model->getSetting();
+                $data['result'] = $setting;
+            } else {
+                $data['error'] = 'Please fill in all required fields!';
+            }
+        }
+
+        $this->load->view('layout/header', $data);
+        $this->load->view('setting/whatsapp_config', $data);
+        $this->load->view('layout/footer', $data);
+    }
+
+    private function ensureWhatsAppColumns()
+    {
+        $this->load->dbforge();
+        $fields = $this->db->field_data('sch_settings');
+        $field_names = array();
+
+        foreach ($fields as $field) {
+            $field_names[] = $field->name;
+        }
+
+        if (!in_array('whatsapp_phone_id', $field_names)) {
+            $this->dbforge->add_column('sch_settings', array(
+                'whatsapp_phone_id' => array(
+                    'type' => 'VARCHAR',
+                    'constraint' => '50',
+                    'null' => TRUE
+                )
+            ));
+        }
+
+        if (!in_array('whatsapp_access_token', $field_names)) {
+            $this->dbforge->add_column('sch_settings', array(
+                'whatsapp_access_token' => array(
+                    'type' => 'TEXT',
+                    'null' => TRUE
+                )
+            ));
+        }
+    }
+
 }

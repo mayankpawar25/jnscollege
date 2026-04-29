@@ -107,9 +107,19 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane active table-responsive no-padding overflow-visible-lg" id="tab_1">
+                                <div id="whatsapp-toolbar" style="display:none; margin:10px; padding:10px; background:#f0f0f0; border-radius:4px;">
+                                    <button id="sendCredentialsBtn" type="button" class="btn btn-success btn-sm">
+                                        <i class="fa fa-whatsapp"></i> Send Student Credentials
+                                    </button>
+                                    <button id="sendFatherCredentialsBtn" type="button" class="btn btn-info btn-sm">
+                                        <i class="fa fa-whatsapp"></i> Send Father Login Info
+                                    </button>
+                                    <span id="selected-count" class="label label-info" style="margin-left:10px;">0 selected</span>
+                                </div>
                                 <table class="table table-striped table-bordered table-hover student-list" data-export-title="<?php echo $this->lang->line('student_list'); ?>">
                                     <thead>
                                         <tr>
+                                            <th class="noExport" style="width:50px;"><input type="checkbox" id="selectAll" title="Select all"></th>
                                             <th><?php echo $this->lang->line('admission_no'); ?></th>
                                             <th><?php echo $this->lang->line('student_name'); ?></th>
                                             <th><?php echo $this->lang->line('class'); ?></th>
@@ -450,4 +460,105 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
             $('#search_text').val("");
         }
     }
+
+    function updateWhatsappToolbar() {
+        var count = $('input.student-check:checked').length;
+        $('#selected-count').text(count + ' selected');
+        $('#whatsapp-toolbar').toggle(count > 0);
+    }
+
+    $(document).on('change', '#selectAll', function() {
+        $('input.student-check').prop('checked', this.checked);
+        updateWhatsappToolbar();
+    });
+
+    $(document).on('change', 'input.student-check', function() {
+        updateWhatsappToolbar();
+    });
+
+    $(document).on('click', '#sendCredentialsBtn', function() {
+        var selectedIds = $('input.student-check:checked').map(function() {
+            return this.value;
+        }).get();
+
+        if (selectedIds.length === 0) {
+            alert('Please select at least one student');
+            return;
+        }
+
+        if (!confirm('Send login credentials to ' + selectedIds.length + ' student(s) via WhatsApp?')) {
+            return;
+        }
+
+        $.ajax({
+            url: baseurl + 'student/sendWhatsappCredentials',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                student_ids: selectedIds,
+                '<?php echo $this->security->get_csrf_token_name(); ?>': '<?php echo $this->security->get_csrf_hash(); ?>'
+            },
+            beforeSend: function() {
+                $('#sendCredentialsBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Sending...');
+            },
+            success: function(response) {
+                if (response.status) {
+                    alert(response.message);
+                    $('input.student-check').prop('checked', false);
+                    updateWhatsappToolbar();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('Failed to send credentials. Please try again.');
+            },
+            complete: function() {
+                $('#sendCredentialsBtn').prop('disabled', false).html('<i class="fa fa-whatsapp"></i> Send Student Credentials');
+            }
+        });
+    });
+
+    $(document).on('click', '#sendFatherCredentialsBtn', function() {
+        var selectedIds = $('input.student-check:checked').map(function() {
+            return this.value;
+        }).get();
+
+        if (selectedIds.length === 0) {
+            alert('Please select at least one student');
+            return;
+        }
+
+        if (!confirm('Send father login info to ' + selectedIds.length + ' student(s) via WhatsApp?')) {
+            return;
+        }
+
+        $.ajax({
+            url: baseurl + 'student/sendFatherLoginInfo',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {
+                student_ids: selectedIds,
+                '<?php echo $this->security->get_csrf_token_name(); ?>': '<?php echo $this->security->get_csrf_hash(); ?>'
+            },
+            beforeSend: function() {
+                $('#sendFatherCredentialsBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Sending...');
+            },
+            success: function(response) {
+                if (response.status) {
+                    alert(response.message);
+                    $('input.student-check').prop('checked', false);
+                    updateWhatsappToolbar();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('Failed to send father login info. Please try again.');
+            },
+            complete: function() {
+                $('#sendFatherCredentialsBtn').prop('disabled', false).html('<i class="fa fa-whatsapp"></i> Send Father Login Info');
+            }
+        });
+    });
 </script>

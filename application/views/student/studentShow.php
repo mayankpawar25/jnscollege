@@ -320,6 +320,9 @@ if ($this->rbac->hasPrivilege('disable_student', 'can_view')) {
                                     <ul class="dropdown-menu">
                                         <li><a style="cursor: pointer;" onclick="send_password()"><?php echo $this->lang->line('send_student_password'); ?></a></li>
                                         <li><a style="cursor: pointer;" onclick="send_parent_password()"> <?php echo $this->lang->line('send_parent_password'); ?></a></li>
+                                        <li class="divider"></li>
+                                        <li><a style="cursor: pointer;" onclick="sendStudentCredentialsViaWhatsApp(<?php echo $student['id']; ?>)"><i class="fa fa-whatsapp" style="color: #25D366;"></i> Send Student Credentials via WhatsApp</a></li>
+                                        <li><a style="cursor: pointer;" onclick="sendFatherCredentialsViaWhatsApp(<?php echo $student['id']; ?>)"><i class="fa fa-whatsapp" style="color: #25D366;"></i> Send Father Login Info via WhatsApp</a></li>
                                     </ul>
                                 </li>  
                                 <li class="pull-right">
@@ -2734,6 +2737,8 @@ function delete_comment(id,student_incident_id){
             <div class="modal-body_logindetail">
             </div>
             <div class="modal-footer clearboth">
+                <button type="button" class="btn btn-success" id="sendStudentViaWhatsApp" onclick="sendStudentCredentialsViaWhatsApp(<?php echo $student['id']; ?>)"><i class="fa fa-whatsapp" style="color: white;"></i> Send Student via WhatsApp</button>
+                <button type="button" class="btn btn-success" id="sendParentViaWhatsApp" onclick="sendFatherCredentialsViaWhatsApp(<?php echo $student['id']; ?>)"><i class="fa fa-whatsapp" style="color: white;"></i> Send Parent via WhatsApp</button>
                 <button type="button" class="btn btn-primary" data-dismiss="modal"><?php echo $this->lang->line('cancel'); ?></button>
             </div>
         </div>
@@ -3044,6 +3049,34 @@ foreach ($reason as $value) {
             success: function (response) {
                 successMsg('<?php echo $this->lang->line('message_successfully_sent'); ?>');
             }
+        });
+    }
+
+    function sendStudentCredentialsViaWhatsApp(student_id) {
+        var base_url = '<?php echo base_url() ?>';
+        var postData = {student_ids: [student_id]};
+        $.post(base_url + "student/sendWhatsappCredentials", postData, function(res) {
+            if (res.status === 1) {
+                successMsg(res.message);
+            } else {
+                errorMsg(res.message);
+            }
+        }, 'json').fail(function() {
+            errorMsg('An error occurred while sending credentials');
+        });
+    }
+
+    function sendFatherCredentialsViaWhatsApp(student_id) {
+        var base_url = '<?php echo base_url() ?>';
+        var postData = {student_ids: [student_id]};
+        $.post(base_url + "student/sendFatherLoginInfo", postData, function(res) {
+            if (res.status === 1) {
+                successMsg(res.message);
+            } else {
+                errorMsg(res.message);
+            }
+        }, 'json').fail(function() {
+            errorMsg('An error occurred while sending credentials');
         });
     }
 
