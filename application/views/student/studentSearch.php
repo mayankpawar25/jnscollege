@@ -412,7 +412,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                             ],
 
                             "columnDefs": [{
-                                "targets": [-1, -2],
+                                "targets": [0, -1, -2],
                                 "orderable": false
                             }],
 
