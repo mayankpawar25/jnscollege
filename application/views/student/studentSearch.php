@@ -148,6 +148,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                                 }
                                             }
                                             ?>
+                                            <th class="noExport">Credentials Sent</th>
                                             <th class="text-right noExport"><?php echo $this->lang->line('action'); ?></th>
                                         </tr>
                                     </thead>
@@ -411,7 +412,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                             ],
 
                             "columnDefs": [{
-                                "targets": -1,
+                                "targets": [-1, -2],
                                 "orderable": false
                             }],
 
@@ -506,6 +507,9 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                     alert(response.message);
                     $('input.student-check').prop('checked', false);
                     updateWhatsappToolbar();
+                    if ($.fn.DataTable.isDataTable('.student-list')) {
+                        $('.student-list').DataTable().ajax.reload(null, false);
+                    }
                 } else {
                     alert('Error: ' + response.message);
                 }
@@ -549,6 +553,9 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                     alert(response.message);
                     $('input.student-check').prop('checked', false);
                     updateWhatsappToolbar();
+                    if ($.fn.DataTable.isDataTable('.student-list')) {
+                        $('.student-list').DataTable().ajax.reload(null, false);
+                    }
                 } else {
                     alert('Error: ' + response.message);
                 }

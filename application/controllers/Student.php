@@ -2592,6 +2592,18 @@ class Student extends Admin_Controller
                     $row[] = $display_field;
                 }
 
+                $sent_cell = '';
+                if (!empty($student->whatsapp_student_sent_at)) {
+                    $sent_cell .= "<span class='label label-success' style='margin-right:3px;' data-toggle='tooltip' title='Student credentials sent: " . $student->whatsapp_student_sent_at . "'>S &#10003;</span>";
+                }
+                if (!empty($student->whatsapp_parent_sent_at)) {
+                    $sent_cell .= "<span class='label label-info' data-toggle='tooltip' title='Parent credentials sent: " . $student->whatsapp_parent_sent_at . "'>P &#10003;</span>";
+                }
+                if ($sent_cell === '') {
+                    $sent_cell = "<span class='text-muted'>&mdash;</span>";
+                }
+                $row[] = $sent_cell;
+
                 $row[] = $viewbtn . '' . $editbtn . '' . $collectbtn;
 
                 $dt_data[] = $row;
@@ -2698,6 +2710,7 @@ class Student extends Admin_Controller
 
             if ($result['status']) {
                 $success_count++;
+                $this->db->where('id', $student_id)->update('students', array('whatsapp_student_sent_at' => date('Y-m-d H:i:s')));
             } else {
                 $failed_count++;
                 $errors[] = 'Student #' . $student_id . ': ' . $result['error'];
@@ -2860,7 +2873,10 @@ class Student extends Admin_Controller
                 continue;
             }
 
-            $father_user = $this->db->get_where('users', array('user_id' => $student_id, 'role' => 'parent'))->row_array();
+            $father_user = $this->db->query(
+                "SELECT * FROM `users` WHERE role = 'parent' AND (childs LIKE ? OR childs LIKE ? OR childs LIKE ? OR childs = ?) LIMIT 1",
+                array('%,' . $student_id . ',%', $student_id . ',%', '%,' . $student_id, (string)$student_id)
+            )->row_array();
 
             if (empty($father_user)) {
                 $failed_count++;
@@ -2878,6 +2894,7 @@ class Student extends Admin_Controller
 
             if ($result['status']) {
                 $success_count++;
+                $this->db->where('id', $student_id)->update('students', array('whatsapp_parent_sent_at' => date('Y-m-d H:i:s')));
             } else {
                 $failed_count++;
                 $errors[] = 'Student #' . $student_id . ': ' . $result['error'];
