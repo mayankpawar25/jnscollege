@@ -10,10 +10,11 @@ class Generateidcard extends Admin_Controller
     public function __construct()
     {
         parent::__construct();
-
+        header("Access-Control-Allow-Headers: Origin,X-Requested-With,Content-Type,Accept,Access-Control-Request-Method,Authorization,Cache-Control");
         $this->load->library('Customlib');
             $this->load->library('media_storage');
         $this->sch_setting_detail = $this->setting_model->getSetting();
+
     }
 
     public function search()
@@ -77,7 +78,7 @@ class Generateidcard extends Admin_Controller
 
     public function generatemultiple()
     {
-        
+
         $studentid           = $this->input->post('data');
         $student_array       = json_decode($studentid);
         $idcard              = $this->input->post('id_card');
@@ -94,6 +95,11 @@ class Generateidcard extends Admin_Controller
         }
       
         $students = $this->student_model->getStudentsByArray($std_arr);
+        // print_r($students);
+        if (count($students) == 0) {
+            echo json_encode(array('status' => 0, 'error' => 'No id card found for selected students'));
+            return;
+        }
         foreach ($students as $key => $students_value) {
             $students[$key]->barcode = $this->customlib->generatebarcode($students_value->admission_no);
         }
