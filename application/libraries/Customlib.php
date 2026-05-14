@@ -33,9 +33,9 @@ class Customlib
     public function getFolderPath()
     {
         $admin       = $this->CI->session->userdata('admin');
-        $folder_path = $admin['db_array']['folder_path'];
-        if ($folder_path == "") {
-            $folder_path = null;
+        $folder_path = isset($admin['db_array']['folder_path']) ? $admin['db_array']['folder_path'] : '';
+        if ($folder_path == "" || !is_dir($folder_path)) {
+            return null;
         }
         return $folder_path;
     }
