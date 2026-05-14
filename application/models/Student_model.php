@@ -2086,7 +2086,7 @@ class Student_model extends MY_Model
 
         $this->datatables->where('student_session.session_id', $this->current_session);
         $this->datatables->where('students.is_active', "yes");
-        $this->datatables->orderable('students.admission_no,students.firstname,classes.class,students.father_name,students.dob,students.gender,categories.category,students.mobileno' . $field_name);
+        $this->datatables->orderable('students.id,students.admission_no,students.firstname,classes.class,students.father_name,students.dob,students.gender,categories.category,students.mobileno' . $field_name);
         $this->datatables->from('students');
         $this->datatables->sort('students.admission_no', 'asc');
         return $this->datatables->generate('json');
@@ -2144,7 +2144,7 @@ class Student_model extends MY_Model
         $this->datatables->where('student_session.session_id', $this->current_session);
         $this->datatables->where('students.is_active', 'yes');
         $this->datatables->searchable('students.admission_no,students.firstname,students.middlename,students.lastname,classes.class,students.father_name,students.dob,students.gender,categories.category,students.mobileno' . $field_variable);
-        $this->datatables->orderable('students.admission_no,students.firstname,classes.class,students.father_name,dob,students.gender,categories.category,students.mobileno' . $field_name);
+        $this->datatables->orderable('students.id,students.admission_no,students.firstname,classes.class,students.father_name,dob,students.gender,categories.category,students.mobileno' . $field_name);
         $this->datatables->sort('students.id');
         $this->datatables->from('students');
         $std_data = $this->datatables->generate('json');
