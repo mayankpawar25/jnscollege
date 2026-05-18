@@ -1,0 +1,84 @@
+[2025-07-08 13:02:44] Transaction ID: 14 - Status: PENDING
+[2025-07-08 13:02:44] QueryRequest: |1000605|67b731bb5c71b_1362|700.00
+[2025-07-08 13:02:45] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:02:45] Response: 
+[2025-07-08 13:02:45] Transaction ID: 16 - Status: PENDING
+[2025-07-08 13:02:45] QueryRequest: |1000605|67b731e333ec5_1362|700.00
+[2025-07-08 13:02:45] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:02:45] Response: 
+[2025-07-08 13:02:45] Transaction ID: 17 - Status: PENDING
+[2025-07-08 13:02:45] QueryRequest: |1000605|67b7321742c92_1362|700.00
+[2025-07-08 13:02:45] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:02:45] Response: 
+[2025-07-08 13:03:26] Transaction ID: 14 - Status: PENDING
+[2025-07-08 13:03:26] QueryRequest: |1000605|67b731bb5c71b_1362|700.00
+[2025-07-08 13:03:27] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:03:27] Response: 
+[2025-07-08 13:03:27] Transaction ID: 16 - Status: PENDING
+[2025-07-08 13:03:27] QueryRequest: |1000605|67b731e333ec5_1362|700.00
+[2025-07-08 13:03:27] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:03:27] Response: 
+[2025-07-08 13:03:27] Transaction ID: 17 - Status: PENDING
+[2025-07-08 13:03:27] QueryRequest: |1000605|67b7321742c92_1362|700.00
+[2025-07-08 13:03:27] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:03:27] Response: 
+[2025-07-08 13:09:44] Transaction ID: 14 - Status: PENDING
+[2025-07-08 13:09:44] QueryRequest: |1000605|67b731bb5c71b_1362|700.00
+[2025-07-08 13:09:44] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:09:44] Response: 
+[2025-07-08 13:09:44] Transaction ID: 16 - Status: PENDING
+[2025-07-08 13:09:44] QueryRequest: |1000605|67b731e333ec5_1362|700.00
+[2025-07-08 13:09:44] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:09:44] Response: 
+[2025-07-08 13:09:44] Transaction ID: 17 - Status: PENDING
+[2025-07-08 13:09:44] QueryRequest: |1000605|67b7321742c92_1362|700.00
+[2025-07-08 13:09:44] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:09:44] Response: 
+[2025-07-08 13:09:48] Transaction ID: 14 - Status: PENDING
+[2025-07-08 13:09:48] QueryRequest: |1000605|67b731bb5c71b_1362|700.00
+[2025-07-08 13:09:48] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:09:48] Response: 
+[2025-07-08 13:09:48] Transaction ID: 16 - Status: PENDING
+[2025-07-08 13:09:48] QueryRequest: |1000605|67b731e333ec5_1362|700.00
+[2025-07-08 13:09:48] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:09:48] Response: 
+[2025-07-08 13:09:48] Transaction ID: 17 - Status: PENDING
+[2025-07-08 13:09:48] QueryRequest: |1000605|67b7321742c92_1362|700.00
+[2025-07-08 13:09:49] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:09:49] Response: 
+[2025-07-08 13:32:21] Transaction ID: 14 - Status: PENDING
+[2025-07-08 13:32:21] QueryRequest: |1000605|67b731bb5c71b_1362|700.00
+[2025-07-08 13:32:22] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:32:22] Response: 
+[2025-07-08 13:32:22] Transaction ID: 16 - Status: PENDING
+[2025-07-08 13:32:22] QueryRequest: |1000605|67b731e333ec5_1362|700.00
+[2025-07-08 13:32:22] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:32:22] Response: 
+[2025-07-08 13:32:22] Transaction ID: 17 - Status: PENDING
+[2025-07-08 13:32:22] QueryRequest: |1000605|67b7321742c92_1362|700.00
+[2025-07-08 13:32:22] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:32:22] Response: 
+[2025-07-08 13:32:24] Transaction ID: 14 - Status: PENDING
+[2025-07-08 13:32:24] QueryRequest: |1000605|67b731bb5c71b_1362|700.00
+[2025-07-08 13:32:24] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:32:24] Response: 
+[2025-07-08 13:32:24] Transaction ID: 16 - Status: PENDING
+[2025-07-08 13:32:24] QueryRequest: |1000605|67b731e333ec5_1362|700.00
+[2025-07-08 13:32:24] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:32:24] Response: 
+[2025-07-08 13:32:24] Transaction ID: 17 - Status: PENDING
+[2025-07-08 13:32:24] QueryRequest: |1000605|67b7321742c92_1362|700.00
+[2025-07-08 13:32:25] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:32:25] Response: 
+[2025-07-08 13:34:16] Transaction ID: 14 - Status: PENDING
+[2025-07-08 13:34:16] QueryRequest: |1000605|67b731bb5c71b_1362|700.00
+[2025-07-08 13:34:17] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:34:17] Response: 
+[2025-07-08 13:34:17] Transaction ID: 16 - Status: PENDING
+[2025-07-08 13:34:17] QueryRequest: |1000605|67b731e333ec5_1362|700.00
+[2025-07-08 13:34:17] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:34:17] Response: 
+[2025-07-08 13:34:17] Transaction ID: 17 - Status: PENDING
+[2025-07-08 13:34:17] QueryRequest: |1000605|67b7321742c92_1362|700.00
+[2025-07-08 13:34:17] CURL ERROR: Received HTTP/0.9 when not allowed
+[2025-07-08 13:34:17] Response: 

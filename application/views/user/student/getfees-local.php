@@ -369,7 +369,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                                                 $aes = new AESEncDec();
                                                                 $EncryptTrans = $aes->encrypt($requestParameter, $key);
                                                                 ?>
-                                                                <form name="eco" class="form_fees1" action="<?=  SBI_BASE_URL.'/secure/AggregatorHostedListener'?>" method="POST" autocomplete="off">
+                                                                <form name="eco" class="form_fees1" action="https://test.sbiepay.sbi/secure/AggregatorHostedListener" method="POST" autocomplete="off">
                                                                     <input type="hidden" name="EncryptTrans" value="<?php echo $EncryptTrans; ?>">
                                                                     <input type="hidden" name="merchIdVal" value="1000605" />
                                                                     <input type="hidden" name="balance" value="<?php echo $balance;?>" />
