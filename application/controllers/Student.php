@@ -2701,12 +2701,12 @@ class Student extends Admin_Controller
             }
 
             $student_name = $student['firstname'] . ' ' . $student['lastname'];
-            $username = $user['username'];
-            $password = $user['password'];
 
             $phone_number = $this->formatPhoneNumber($student['mobileno']);
 
-            $result = $this->sendWhatsappMessage($phone_number, $student_name, $username, $password, $whatsapp_access_token, $phone_number_id);
+            $credential_url = $this->createCredentialUrl($user['id'], 'student', $student_id);
+
+            $result = $this->sendWhatsappMessage($phone_number, $student_name, $credential_url, $whatsapp_access_token, $phone_number_id);
 
             if ($result['status']) {
                 $success_count++;
@@ -2732,6 +2732,57 @@ class Student extends Admin_Controller
             $phone = '91' . $phone;
         }
         return $phone;
+    }
+
+    private function ensureCredentialTokensTable()
+    {
+        if ($this->db->table_exists('whatsapp_credential_tokens')) {
+            return;
+        }
+
+        $sql = "CREATE TABLE IF NOT EXISTS `whatsapp_credential_tokens` (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `token` VARCHAR(128) NOT NULL,
+            `user_id` INT(11) NOT NULL,
+            `role` VARCHAR(20) NOT NULL,
+            `student_id` INT(11) DEFAULT NULL,
+            `created_at` DATETIME NOT NULL,
+            `expires_at` DATETIME NOT NULL,
+            `accessed_at` DATETIME DEFAULT NULL,
+            `access_count` INT(11) NOT NULL DEFAULT 0,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `token` (`token`),
+            KEY `user_id` (`user_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+
+        $this->db->query($sql);
+    }
+
+    private function createCredentialUrl($user_id, $role, $student_id = null)
+    {
+        $this->ensureCredentialTokensTable();
+
+        if (function_exists('random_bytes')) {
+            $token = bin2hex(random_bytes(24));
+        } elseif (function_exists('openssl_random_pseudo_bytes')) {
+            $token = bin2hex(openssl_random_pseudo_bytes(24));
+        } else {
+            $token = md5(uniqid((string) mt_rand(), true)) . md5(uniqid((string) mt_rand(), true));
+        }
+
+        $expiry_days = 30;
+
+        $this->db->insert('whatsapp_credential_tokens', array(
+            'token'        => $token,
+            'user_id'      => $user_id,
+            'role'         => $role,
+            'student_id'   => $student_id,
+            'created_at'   => date('Y-m-d H:i:s'),
+            'expires_at'   => date('Y-m-d H:i:s', strtotime('+' . $expiry_days . ' days')),
+            'access_count' => 0,
+        ));
+
+        return site_url('credentials/view/' . $token);
     }
 
     private function sendStudentMessage($phone_number, $student_name, $username, $password, $access_token, $phone_number_id)
@@ -2782,7 +2833,7 @@ class Student extends Admin_Controller
         }
     }
 
-    private function sendWhatsappMessage($phone_number, $student_name, $username, $password, $access_token, $phone_number_id)
+    private function sendWhatsappMessage($phone_number, $student_name, $credential_url, $access_token, $phone_number_id)
     {
         $url = "https://graph.facebook.com/v18.0/{$phone_number_id}/messages";
 
@@ -2791,7 +2842,7 @@ class Student extends Admin_Controller
             'to' => $phone_number,
             'type' => 'template',
             'template' => array(
-                'name' => 'auth_detials',
+                'name' => 'child_details',
                 'language' => array(
                     'code' => 'en'
                 ),
@@ -2800,8 +2851,7 @@ class Student extends Admin_Controller
                         'type' => 'body',
                         'parameters' => array(
                             array('type' => 'text', 'text' => $student_name),
-                            array('type' => 'text', 'text' => $username),
-                            array('type' => 'text', 'text' => $password)
+                            array('type' => 'text', 'text' => $credential_url)
                         )
                     )
                 )
@@ -2885,12 +2935,12 @@ class Student extends Admin_Controller
             }
 
             $father_name = $student['father_name'] ?? 'Parent';
-            $username = $father_user['username'];
-            $password = $father_user['password'];
 
             $phone_number = $this->formatPhoneNumber($student['father_phone']);
 
-            $result = $this->sendFatherMessage($phone_number, $father_name, $username, $password, $whatsapp_access_token, $phone_number_id);
+            $credential_url = $this->createCredentialUrl($father_user['id'], 'parent', $student_id);
+
+            $result = $this->sendFatherMessage($phone_number, $father_name, $credential_url, $whatsapp_access_token, $phone_number_id);
 
             if ($result['status']) {
                 $success_count++;
@@ -2909,7 +2959,7 @@ class Student extends Admin_Controller
         echo json_encode(array('status' => 1, 'message' => $message, 'success' => $success_count, 'failed' => $failed_count, 'errors' => $errors));
     }
 
-    private function sendFatherMessage($phone_number, $father_name, $username, $password, $access_token, $phone_number_id)
+    private function sendFatherMessage($phone_number, $father_name, $credential_url, $access_token, $phone_number_id)
     {
         $url = "https://graph.facebook.com/v18.0/{$phone_number_id}/messages";
 
@@ -2918,7 +2968,7 @@ class Student extends Admin_Controller
             'to' => $phone_number,
             'type' => 'template',
             'template' => array(
-                'name' => 'parent_cred',
+                'name' => 'parent_details',
                 'language' => array(
                     'code' => 'en'
                 ),
@@ -2927,8 +2977,7 @@ class Student extends Admin_Controller
                         'type' => 'body',
                         'parameters' => array(
                             array('type' => 'text', 'text' => $father_name),
-                            array('type' => 'text', 'text' => $username),
-                            array('type' => 'text', 'text' => $password)
+                            array('type' => 'text', 'text' => $credential_url)
                         )
                     )
                 )
