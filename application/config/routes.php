@@ -16,6 +16,7 @@ spl_autoload_register('my_autoloader');
 $route['default_controller'] = 'welcome/index';
 $route['user/resetpassword/([a-z]+)/(:any)'] = 'site/resetpassword/$1/$2';
 $route['admin/resetpassword/(:any)'] = 'site/admin_resetpassword/$1';
+$route['credentials/setup/(:any)'] = 'credentials/setup/$1';
 $route['admin/unauthorized'] = 'admin/admin/unauthorized';
 $route['parent/unauthorized'] = 'parent/parents/unauthorized';
 $route['student/unauthorized'] = 'user/user/unauthorized';

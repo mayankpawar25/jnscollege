@@ -318,9 +318,6 @@ if ($this->rbac->hasPrivilege('disable_student', 'can_view')) {
                                 <li class="pull-right dropdown rtl-dropdown">
                                     <a href="#" class="dropdown-toggle" type="button" data-toggle="dropdown"><i class="fa fa-ellipsis-v"></i></a>
                                     <ul class="dropdown-menu">
-                                        <li><a style="cursor: pointer;" onclick="send_password()"><?php echo $this->lang->line('send_student_password'); ?></a></li>
-                                        <li><a style="cursor: pointer;" onclick="send_parent_password()"> <?php echo $this->lang->line('send_parent_password'); ?></a></li>
-                                        <li class="divider"></li>
                                         <li><a style="cursor: pointer;" onclick="sendStudentCredentialsViaWhatsApp(<?php echo $student['id']; ?>)"><i class="fa fa-whatsapp" style="color: #25D366;"></i> Send Student Credentials via WhatsApp</a></li>
                                         <li><a style="cursor: pointer;" onclick="sendFatherCredentialsViaWhatsApp(<?php echo $student['id']; ?>)"><i class="fa fa-whatsapp" style="color: #25D366;"></i> Send Father Login Info via WhatsApp</a></li>
                                     </ul>
@@ -3011,46 +3008,6 @@ foreach ($reason as $value) {
             info: false
         });
     });
-
-    function send_password() {
-        var base_url = '<?php echo base_url() ?>';
-        var student_session_id = '<?php echo $student['student_session_id']; ?>';
-         var student_id = '<?php echo $student['id']; ?>';
-        var username = '<?php echo $student['username']; ?>';
-        var password = '<?php echo $student['password']; ?>';
-        var contact_no = '<?php echo $student['mobileno']; ?>';
-        var email = '<?php echo $student['email']; ?>';
-        var admission_no    = '<?php echo $student['admission_no']; ?>';
-
-        $.ajax({
-            type: "post",
-            url: base_url + "student/sendpassword",
-            data: {student_id: student_id, username: username, password: password, contact_no: contact_no, email: email, admission_no: admission_no,student_session_id:student_session_id},
-            success: function (response) {
-                successMsg('<?php echo $this->lang->line('message_successfully_sent'); ?>');
-            }
-        });
-    }
-
-    function send_parent_password() {
-        var base_url = '<?php echo base_url() ?>';
-        var student_id = '<?php echo $student['id']; ?>';
-         var student_session_id = '<?php echo $student['student_session_id']; ?>';
-        var username = '<?php echo $guardian_credential['username']; ?>';
-        var password = '<?php echo $guardian_credential['password']; ?>';
-        var contact_no = '<?php echo $student['guardian_phone']; ?>';
-        var email = '<?php echo $student['guardian_email']; ?>';
-        var admission_no    = '<?php echo $student['admission_no']; ?>';
-
-        $.ajax({
-            type: "post",
-            url: base_url + "student/send_parent_password",
-            data: {student_id: student_id, username: username, password: password, contact_no: contact_no, email: email, admission_no: admission_no,student_session_id:student_session_id},
-            success: function (response) {
-                successMsg('<?php echo $this->lang->line('message_successfully_sent'); ?>');
-            }
-        });
-    }
 
     function sendStudentCredentialsViaWhatsApp(student_id) {
         var base_url = '<?php echo base_url() ?>';

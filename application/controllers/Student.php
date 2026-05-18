@@ -889,19 +889,6 @@ class Student extends Admin_Controller
         return true;
     }
 
-    public function sendpassword()
-    {
-        $student_login_detail = array('id' => $this->input->post('student_id'), 'credential_for' => 'student', 'username' => $this->input->post('username'), 'password' => $this->input->post('password'), 'contact_no' => $this->input->post('contact_no'), 'email' => $this->input->post('email'), 'admission_no' => $this->input->post('admission_no'), 'student_session_id' => $this->input->post('student_session_id'));
-
-        $msg = $this->mailsmsconf->mailsms('student_login_credential', $student_login_detail);
-    }
-
-    public function send_parent_password()
-    {
-        $parent_login_detail = array('id' => $this->input->post('student_id'), 'credential_for' => 'parent', 'username' => $this->input->post('username'), 'password' => $this->input->post('password'), 'contact_no' => $this->input->post('contact_no'), 'email' => $this->input->post('email'), 'admission_no' => $this->input->post('admission_no'), 'student_session_id' => $this->input->post('student_session_id'));
-
-        $msg = $this->mailsmsconf->mailsms('student_login_credential', $parent_login_detail);
-    }
 
     public function import()
     {
@@ -2670,11 +2657,10 @@ class Student extends Admin_Controller
             exit;
         }
 
-        $setting = $this->setting_model->getSetting();
-        $whatsapp_access_token = $setting->whatsapp_access_token ?? '';
-        $phone_number_id = $setting->whatsapp_phone_id ?? '';
+        $this->load->helper('whatsapp');
+        $creds = whatsapp_get_meta_credentials();
 
-        if (empty($whatsapp_access_token) || empty($phone_number_id)) {
+        if (empty($creds['access_token']) || empty($creds['phone_number_id'])) {
             echo json_encode(array('status' => 0, 'message' => 'WhatsApp credentials not configured. Please configure them in System Settings'));
             exit;
         }
@@ -2700,13 +2686,10 @@ class Student extends Admin_Controller
                 continue;
             }
 
-            $student_name = $student['firstname'] . ' ' . $student['lastname'];
+            $student_name   = trim($student['firstname'] . ' ' . $student['lastname']);
+            $setup_url      = $this->createCredentialUrl($user['id'], 'student', $student_id);
 
-            $phone_number = $this->formatPhoneNumber($student['mobileno']);
-
-            $credential_url = $this->createCredentialUrl($user['id'], 'student', $student_id);
-
-            $result = $this->sendWhatsappMessage($phone_number, $student_name, $credential_url, $whatsapp_access_token, $phone_number_id);
+            $result = whatsapp_send_credential_setup('student', $student['mobileno'], $student_name, $setup_url, $creds['access_token'], $creds['phone_number_id']);
 
             if ($result['status']) {
                 $success_count++;
@@ -2725,166 +2708,10 @@ class Student extends Admin_Controller
         echo json_encode(array('status' => 1, 'message' => $message, 'success' => $success_count, 'failed' => $failed_count, 'errors' => $errors));
     }
 
-    private function formatPhoneNumber($phone)
-    {
-        $phone = preg_replace('/[^0-9]/', '', $phone);
-        if (strlen($phone) == 10) {
-            $phone = '91' . $phone;
-        }
-        return $phone;
-    }
-
-    private function ensureCredentialTokensTable()
-    {
-        if ($this->db->table_exists('whatsapp_credential_tokens')) {
-            return;
-        }
-
-        $sql = "CREATE TABLE IF NOT EXISTS `whatsapp_credential_tokens` (
-            `id` INT(11) NOT NULL AUTO_INCREMENT,
-            `token` VARCHAR(128) NOT NULL,
-            `user_id` INT(11) NOT NULL,
-            `role` VARCHAR(20) NOT NULL,
-            `student_id` INT(11) DEFAULT NULL,
-            `created_at` DATETIME NOT NULL,
-            `expires_at` DATETIME NOT NULL,
-            `accessed_at` DATETIME DEFAULT NULL,
-            `access_count` INT(11) NOT NULL DEFAULT 0,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `token` (`token`),
-            KEY `user_id` (`user_id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
-
-        $this->db->query($sql);
-    }
-
     private function createCredentialUrl($user_id, $role, $student_id = null)
     {
-        $this->ensureCredentialTokensTable();
-
-        if (function_exists('random_bytes')) {
-            $token = bin2hex(random_bytes(24));
-        } elseif (function_exists('openssl_random_pseudo_bytes')) {
-            $token = bin2hex(openssl_random_pseudo_bytes(24));
-        } else {
-            $token = md5(uniqid((string) mt_rand(), true)) . md5(uniqid((string) mt_rand(), true));
-        }
-
-        $expiry_days = 30;
-
-        $this->db->insert('whatsapp_credential_tokens', array(
-            'token'        => $token,
-            'user_id'      => $user_id,
-            'role'         => $role,
-            'student_id'   => $student_id,
-            'created_at'   => date('Y-m-d H:i:s'),
-            'expires_at'   => date('Y-m-d H:i:s', strtotime('+' . $expiry_days . ' days')),
-            'access_count' => 0,
-        ));
-
-        return site_url('credentials/view/' . $token);
-    }
-
-    private function sendStudentMessage($phone_number, $student_name, $username, $password, $access_token, $phone_number_id)
-    {
-        $url = "https://graph.facebook.com/v18.0/{$phone_number_id}/messages";
-
-        $message_body = "Hi " . $student_name . ",\n\n";
-        $message_body .= "Please find your account login details below. Kindly keep this information secure for safety purposes:\n\n";
-        $message_body .= "Username: " . $username . "\n";
-        $message_body .= "Password: " . $password . "\n\n";
-        $message_body .= "If you have any questions or need assistance, feel free to reach out.";
-
-        $data = array(
-            'messaging_product' => 'whatsapp',
-            'to' => $phone_number,
-            'type' => 'text',
-            'text' => array(
-                'body' => $message_body
-            )
-        );
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $access_token
-        ));
-
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
-
-        if ($http_code == 200) {
-            return array('status' => true);
-        } else {
-            $error_msg = 'WhatsApp API error: HTTP ' . $http_code;
-            if (!empty($curl_error)) {
-                $error_msg .= ' - ' . $curl_error;
-            }
-            if (!empty($response)) {
-                $error_msg .= ' - ' . $response;
-            }
-            return array('status' => false, 'error' => $error_msg);
-        }
-    }
-
-    private function sendWhatsappMessage($phone_number, $student_name, $credential_url, $access_token, $phone_number_id)
-    {
-        $url = "https://graph.facebook.com/v18.0/{$phone_number_id}/messages";
-
-        $data = array(
-            'messaging_product' => 'whatsapp',
-            'to' => $phone_number,
-            'type' => 'template',
-            'template' => array(
-                'name' => 'child_details',
-                'language' => array(
-                    'code' => 'en'
-                ),
-                'components' => array(
-                    array(
-                        'type' => 'body',
-                        'parameters' => array(
-                            array('type' => 'text', 'text' => $student_name),
-                            array('type' => 'text', 'text' => $credential_url)
-                        )
-                    )
-                )
-            )
-        );
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $access_token
-        ));
-
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
-
-        if ($http_code == 200) {
-            return array('status' => true);
-        } else {
-            $error_msg = 'WhatsApp API error: HTTP ' . $http_code;
-            if (!empty($curl_error)) {
-                $error_msg .= ' - ' . $curl_error;
-            }
-            if (!empty($response)) {
-                $error_msg .= ' - ' . $response;
-            }
-            return array('status' => false, 'error' => $error_msg);
-        }
+        $this->load->helper('credential');
+        return create_credential_setup_url($user_id, $role, $student_id);
     }
 
     public function sendFatherLoginInfo()
@@ -2901,11 +2728,10 @@ class Student extends Admin_Controller
             exit;
         }
 
-        $setting = $this->setting_model->getSetting();
-        $whatsapp_access_token = $setting->whatsapp_access_token ?? '';
-        $phone_number_id = $setting->whatsapp_phone_id ?? '';
+        $this->load->helper('whatsapp');
+        $creds = whatsapp_get_meta_credentials();
 
-        if (empty($whatsapp_access_token) || empty($phone_number_id)) {
+        if (empty($creds['access_token']) || empty($creds['phone_number_id'])) {
             echo json_encode(array('status' => 0, 'message' => 'WhatsApp credentials not configured. Please configure them in System Settings'));
             exit;
         }
@@ -2935,12 +2761,9 @@ class Student extends Admin_Controller
             }
 
             $father_name = $student['father_name'] ?? 'Parent';
+            $setup_url   = $this->createCredentialUrl($father_user['id'], 'parent', $student_id);
 
-            $phone_number = $this->formatPhoneNumber($student['father_phone']);
-
-            $credential_url = $this->createCredentialUrl($father_user['id'], 'parent', $student_id);
-
-            $result = $this->sendFatherMessage($phone_number, $father_name, $credential_url, $whatsapp_access_token, $phone_number_id);
+            $result = whatsapp_send_credential_setup('parent', $student['father_phone'], $father_name, $setup_url, $creds['access_token'], $creds['phone_number_id']);
 
             if ($result['status']) {
                 $success_count++;
@@ -2957,60 +2780,6 @@ class Student extends Admin_Controller
         }
 
         echo json_encode(array('status' => 1, 'message' => $message, 'success' => $success_count, 'failed' => $failed_count, 'errors' => $errors));
-    }
-
-    private function sendFatherMessage($phone_number, $father_name, $credential_url, $access_token, $phone_number_id)
-    {
-        $url = "https://graph.facebook.com/v18.0/{$phone_number_id}/messages";
-
-        $data = array(
-            'messaging_product' => 'whatsapp',
-            'to' => $phone_number,
-            'type' => 'template',
-            'template' => array(
-                'name' => 'parent_details',
-                'language' => array(
-                    'code' => 'en'
-                ),
-                'components' => array(
-                    array(
-                        'type' => 'body',
-                        'parameters' => array(
-                            array('type' => 'text', 'text' => $father_name),
-                            array('type' => 'text', 'text' => $credential_url)
-                        )
-                    )
-                )
-            )
-        );
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $access_token
-        ));
-
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
-
-        if ($http_code == 200) {
-            return array('status' => true);
-        } else {
-            $error_msg = 'WhatsApp API error: HTTP ' . $http_code;
-            if (!empty($curl_error)) {
-                $error_msg .= ' - ' . $curl_error;
-            }
-            if (!empty($response)) {
-                $error_msg .= ' - ' . $response;
-            }
-            return array('status' => false, 'error' => $error_msg);
-        }
     }
 
     public function getStudentByClassSection()

@@ -437,11 +437,33 @@ class Onlinestudent extends Admin_Controller
                     $sender_details = array('student_id' => $response->student_id, 'contact_no' => $this->input->post('guardian_phone'), 'email' => $this->input->post('guardian_email'));
                     $this->mailsmsconf->mailsms('student_admission', $sender_details);
 
-                    $student_login_detail = array('id' => $response->student_id, 'credential_for' => 'student', 'username' => $this->student_login_prefix . $response->student_id, 'password' => $response->user_password, 'contact_no' => $this->input->post('mobileno'), 'email' => $this->input->post('email'), 'admission_no' => $response->admission_no);
-                    $this->mailsmsconf->mailsms('student_login_credential', $student_login_detail);
+                    $this->load->helper(array('credential', 'whatsapp'));
+                    $creds = whatsapp_get_meta_credentials();
 
-                    $parent_login_detail = array('id' => $response->student_id, 'credential_for' => 'parent', 'username' => $this->parent_login_prefix . $response->student_id, 'password' => $response->parent_password, 'contact_no' => $this->input->post('guardian_phone'), 'email' => $this->input->post('guardian_email'));
-                    $this->mailsmsconf->mailsms('login_credential', $parent_login_detail);
+                    if (!empty($creds['access_token']) && !empty($creds['phone_number_id'])) {
+                        $student_user = $this->db->get_where('users', array('user_id' => $response->student_id, 'role' => 'student'))->row_array();
+                        if (!empty($student_user)) {
+                            $student_phone = $this->input->post('mobileno');
+                            if (!empty($student_phone)) {
+                                $student_name = trim($this->input->post('firstname') . ' ' . $this->input->post('lastname'));
+                                $student_url  = create_credential_setup_url($student_user['id'], 'student', $response->student_id);
+                                whatsapp_send_credential_setup('student', $student_phone, $student_name, $student_url, $creds['access_token'], $creds['phone_number_id']);
+                            }
+                        }
+
+                        $student_row = $this->db->get_where('students', array('id' => $response->student_id))->row_array();
+                        if (!empty($student_row) && !empty($student_row['parent_id'])) {
+                            $parent_user = $this->db->get_where('users', array('id' => $student_row['parent_id'], 'role' => 'parent'))->row_array();
+                            if (!empty($parent_user)) {
+                                $guardian_phone = $this->input->post('guardian_phone');
+                                if (!empty($guardian_phone)) {
+                                    $guardian_name = $this->input->post('guardian_name');
+                                    $parent_url    = create_credential_setup_url($parent_user['id'], 'parent', $response->student_id);
+                                    whatsapp_send_credential_setup('parent', $guardian_phone, $guardian_name, $parent_url, $creds['access_token'], $creds['phone_number_id']);
+                                }
+                            }
+                        }
+                    }
                 }
 
                 $this->session->set_flashdata('msg', '<div class="alert alert-success text-left">' . $this->lang->line('update_message') . '</div>');
