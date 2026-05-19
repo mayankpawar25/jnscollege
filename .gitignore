@@ -6,3 +6,4 @@
 /application/models-bk/*
 /backend/captcha_images/*
 /*.zip
+application/config/config.php
