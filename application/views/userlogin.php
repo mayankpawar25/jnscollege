@@ -94,6 +94,12 @@ if ($this->session->flashdata('message')) {
                                                 <a href="<?php echo site_url('site/privacyPolicy') ?>" class="forgot"> Privacy Policy |</a> 
                                                 <a href="<?php echo site_url('site/contactUs') ?>" class="forgot"> Contact Us</a>
                                             </div>
+                                            <div class="col-md-12">
+                                                <hr>
+                                               <button type="button" class="btn" style="background-color: #337ab7;border-color:#337ab7;color: #fff;width:100% !important" onclick="window.location.href='https://jnscollege.com/web/'">
+                                                <?php echo $this->lang->line('website'); ?></button>
+                                
+                                        </div>
                                         </div>
                                 
                                         <p> </p> 
