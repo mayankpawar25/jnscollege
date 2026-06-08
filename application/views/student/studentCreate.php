@@ -447,27 +447,26 @@ foreach ($hostelList as $hostel_key => $hostel_value) {
                         <h4 class="pagetitleh2">
             <?php echo $this->lang->line('fees_details'); ?>
             <span class="float-right bmedium total_fees_alloted">
-             <?php
+                <?php
+                    $view_total_fees = 0;
+                    foreach ($feesessiongroup_model as $feesessiongroup_key => $feesessiongroup_value) {
+                        $total_fees = 0;
 
-$view_total_fees = 0;
-foreach ($feesessiongroup_model as $feesessiongroup_key => $feesessiongroup_value) {
-    $total_fees = 0;
+                        foreach ($feesessiongroup_value->feetypes as $fee_type_key => $fee_type_value) {
+                            $total_fees += $fee_type_value->amount;
+                        }
 
-    foreach ($feesessiongroup_value->feetypes as $fee_type_key => $fee_type_value) {
-        $total_fees += $fee_type_value->amount;
-    }
-
-    if (isset($_POST['fee_session_group_id'])) {
-        if (in_array($feesessiongroup_value->id, $_POST['fee_session_group_id'])) {
-            $view_total_fees += $total_fees;
-        }
-    }
-}
-if(!empty($view_total_fees)){
-echo amountFormat($view_total_fees);
-}
-?>
-<input type="hidden" name="total_post_fees" value="<?php echo $view_total_fees; ?>">
+                        if (isset($_POST['fee_session_group_id'])) {
+                            if (in_array($feesessiongroup_value->id, $_POST['fee_session_group_id'])) {
+                                $view_total_fees += $total_fees;
+                            }
+                        }
+                    }
+                    if(!empty($view_total_fees)){
+                    echo amountFormat($view_total_fees);
+                    }
+                ?>
+                <input type="hidden" name="total_post_fees" value="<?php echo $view_total_fees; ?>">
             </span>
                          </h4>
                                                     <div class="row around10">
@@ -475,8 +474,14 @@ echo amountFormat($view_total_fees);
                                       <?php
 if (!empty($feesessiongroup_model)) {
     ?>
+    <div class="row">
+        <div class="col-md-4">
+            <input type="text" id="feeSearch" class="form-control" placeholder="Search Fee Name...">
+        </div>
+    </div>
 <div class="table-responsive border0">
-<table class="table mb0">
+    
+<table class="table mb0" id="fees_table">
     <tbody>
         <?php
 foreach ($feesessiongroup_model as $feesessiongroup_key => $feesessiongroup_value) {
@@ -494,7 +499,7 @@ foreach ($feesessiongroup_model as $feesessiongroup_key => $feesessiongroup_valu
         <h6 class="panel-title panel-title1 overflow-hidden">
           <input class="fee_group_chk vertical-middle" type="checkbox" name="fee_session_group_id[]" value="<?php echo $feesessiongroup_value->id; ?>" <?php echo set_checkbox('fee_session_group_id[]', $feesessiongroup_value->id); ?>>
           <a class="display-inline collapsed box-plus-panel" data-toggle="collapse" href="#collapse_fees_<?php echo $feesessiongroup_value->id ?>">
-             <span class="font14"><?php echo $feesessiongroup_value->group_name; ?></span></a>
+             <span class="font14 feegroup_name"><?php echo $feesessiongroup_value->group_name; ?></span></a>
           <span class="float-right bmedium pt3 fee_group_total" data-amount="<?php echo ($total_fees); ?>"><?php echo amountFormat($total_fees); ?></span>
         </h6>
       </div>
@@ -1346,5 +1351,33 @@ $('#fee_session_group_id').multiselect({
 //==============
 
     });
+
+        // Debounce function to limit the frequency of search execution
+        function debounce(func, delay) {
+            let timer;
+            return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        // Search function for filtering fee groups
+        function filterFeeGroups() {
+            var searchTerm = $('#feeSearch').val().toLowerCase();
+
+            // Loop through each table row in #fees_table and filter based on the search term
+            $('#fees_table tbody tr').each(function () {
+                var feeGroupName = $(this).find('.feegroup_name').text().toLowerCase();
+
+                if (feeGroupName.includes(searchTerm)) {
+                    $(this).show(); // Show matching row
+                } else {
+                    $(this).hide(); // Hide non-matching row
+                }
+            });
+        }
+
+        // Attach the debounced search function to the keyup event
+        $('#feeSearch').on('keyup', debounce(filterFeeGroups, 300)); // 300ms delay
     });
 </script>
