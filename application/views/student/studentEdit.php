@@ -549,7 +549,12 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                         <?php
                                         if (!empty($feesessiongroup_model)) {
                                         ?>
-                                            <table class="table">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <input type="text" id="feeSearch" class="form-control" placeholder="Search Fee Name...">
+                                            </div>
+                                        </div>
+                                            <table class="table" id="fees_table">
                                                 <tbody>
                                                     <?php
                                                     foreach ($feesessiongroup_model as $feesessiongroup_key => $feesessiongroup_value) {
@@ -573,7 +578,7 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
                                                                             <h6 class="panel-title panel-title1 overflow-hidden">
                                                                                 <input class="fee_group_chk vertical-middle" type="checkbox" name="fee_session_group_id[]" value="<?php echo $feesessiongroup_value->id; ?>" <?php echo set_checkbox('fee_session_group_id[]', $feesessiongroup_value->id, ($feesessiongroup_value->student_fees_master_id > 0) ? true : false); ?> class="fee_group_chk vertical-middle">
                                                                                 <a class="display-inline collapsed box-plus-panel" data-toggle="collapse" href="#collapse_fees_<?php echo $feesessiongroup_value->id ?>">
-                                                                                    <span class="font14"><?php echo $feesessiongroup_value->group_name; ?></span>
+                                                                                    <span class="font14 feegroup_name"><?php echo $feesessiongroup_value->group_name; ?></span>
                                                                                 </a>
                                                                                 <span class="float-right bmedium pt3 fee_group_total" data-amount="<?php echo ($total_fees); ?>"><?php echo amountFormat($total_fees); ?></span>
                                                                             </h6>
@@ -1495,6 +1500,34 @@ $currency_symbol = $this->customlib->getSchoolCurrencyFormat();
             }
 
         });
+
+        // Debounce function to limit the frequency of search execution
+        function debounce(func, delay) {
+            let timer;
+            return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        // Search function for filtering fee groups
+        function filterFeeGroups() {
+            var searchTerm = $('#feeSearch').val().toLowerCase();
+
+            // Loop through each table row in #fees_table and filter based on the search term
+            $('#fees_table tbody tr').each(function () {
+                var feeGroupName = $(this).find('.feegroup_name').text().toLowerCase();
+
+                if (feeGroupName.includes(searchTerm)) {
+                    $(this).show(); // Show matching row
+                } else {
+                    $(this).hide(); // Hide non-matching row
+                }
+            });
+        }
+
+        // Attach the debounced search function to the keyup event
+        $('#feeSearch').on('keyup', debounce(filterFeeGroups, 300)); // 300ms delay
     });
 </script>
 
