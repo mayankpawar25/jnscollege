@@ -694,7 +694,7 @@ class Studentfeemaster_model extends MY_Model
         }
         $this->db->where('fee_groups_feetype.session_id', $this->current_session);
         $this->db->where('student_session.session_id', $this->current_session);
-        // $this->db->order_by('student_fees_deposite.id','desc');
+        $this->db->order_by('student_fees_deposite.id', 'desc');
 
         if ($class_id != null) {
             $this->db->where('student_session.class_id', $class_id);
@@ -719,7 +719,7 @@ class Studentfeemaster_model extends MY_Model
 
 
             $this->db->where('student_session.session_id', $this->current_session);
-            // $this->db->order_by('student_fees_deposite.id','desc');
+            $this->db->order_by('student_fees_deposite.id', 'desc');
 
             if ($class_id != null) {
                 $this->db->where('student_session.class_id', $class_id);
@@ -802,6 +802,14 @@ class Studentfeemaster_model extends MY_Model
                 }
             }
         }
+
+        // Sort by payment id (deposit id, then inv_no) in descending order
+        usort($return_array, function ($a, $b) {
+            if ($a['id'] == $b['id']) {
+                return $b['inv_no'] - $a['inv_no'];
+            }
+            return $b['id'] - $a['id'];
+        });
 
         return $return_array;
     }
